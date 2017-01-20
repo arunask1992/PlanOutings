@@ -13,7 +13,29 @@
 <body>
 
     <div class="container">
-            Hiiii
+    <form  action="/configure" method="post">
+      <div class="form-group">
+        <label for="selectGroup">Select group to post outing info to</label>
+        <select class="form-control" id="group" name="groupId">
+          <% for(var i=0; i < groups.length; i++) { %>
+                    <option value="<%= groups[i].id %>"><%= groups[i].name %></option>
+          <% } %>
+        </select>
+      </div>
+      <fieldset class="form-group">
+        <legend>Select a valid outing frequency</legend>
+        <div class="form-check">
+          <label class="form-check-label">
+             <% types=JSON.parse(outingTypes); %>
+             <% for(var i=0; i < types.length; i++) { %>
+            <input type="radio" class="form-check-input" name="outingFrequency" id="optionsRadios1" value="<%= types[i].id %>" checked>
+                <%= types[i].displayName %>
+            <% } %>
+          </label>
+        </div>
+        <input type="hidden" name="userId" value="<%= userId %>" />
+      <button type="submit" class="btn btn-primary">Submit</button>
+    </form>
     </div>
 </body>
 </html>

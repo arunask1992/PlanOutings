@@ -1,6 +1,6 @@
 module.exports = {
-    appId: '1abb975e-ed3a-4ad6-b414-75e3e5548fe2',
-    appSecret: '0f321ddf-ce03-4483-a212-b1dc174ba3d3',
+    appId: 'b0855111-8055-44a2-930a-884db6a2c000',
+    appSecret: '3a653c77-1948-4a93-99ed-781125dc2f3f',
     mysqlHost: 'localhost',
     mysqlUser: 'root',
     mysqlPassword: '',

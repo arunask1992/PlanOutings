@@ -5,30 +5,19 @@ var fs = require('fs');
 var mysql = require("mysql");
 var request = require('request');
 var path = require('path');
+
 flock.setAppId(config.appId);
 flock.setAppSecret(config.appSecret);
 
 var app = express();
 app.set('view engine','ejs');
+var bodyParser = require('body-parser');
+app.use(bodyParser.json()); // support json encoded bodies
+app.use(bodyParser.urlencoded({ extended: true }));
 
 // Listen for events on /events, and verify event tokens using the token verifier.
 app.use(flock.events.tokenVerifier);
 app.post('/events', flock.events.listener);
-app.get('/configure',function(req, res) {
-    var token = req.get('x-flock-validation-token') || req.query.flockValidationToken;
-    if (token) {
-        var payload = flock.events.verifyToken(token);
-        if (!payload) {
-            console.log('Invalid event token', token);
-            res.sendStatus(403);
-            return;
-        }
-        res.render(path.join(__dirname + '/configure'),{userId:payload.userId});
-        res.locals.eventTokenPayload = payload;
-    }
-    else
-        res.sendStatus(403)
-});
 var con = mysql.createConnection({
     host: config.mysqlHost,
     user: config.mysqlUser,
@@ -41,6 +30,14 @@ con.connect(function(err){
         return;
     }
     console.log('Connection established');
+});
+
+var outingTypes;
+con.query('SELECT * from outingFrequency', function(err,response){
+   if(err) throw err;
+    else {
+       outingTypes = JSON.stringify(response);
+   }
 });
 // save tokens on app.install
 flock.events.on('app.install', function (event) {
@@ -62,6 +59,58 @@ flock.events.on('app.uninstall', function (event) {
         if (error) throw error;
         console.log('deleted ');
     })
+});
+
+app.get('/configure',function(req, res) {
+    var token = req.get('x-flock-validation-token') || req.query.flockValidationToken;
+    var tokenForRequest;
+    if (token) {
+        var payload = flock.events.verifyToken(token);
+        if (!payload) {
+            console.log('Invalid event token', token);
+            res.sendStatus(403);
+            return;
+        }
+
+
+        con.query('SELECT token from tokens WHERE uid=? limit 1', payload.userId, function(err,response){
+            if(err) throw err;
+            else
+            {
+                tokenForRequest = response[0]['token'];
+                flock.callMethod('groups.list', tokenForRequest,
+                    {
+                        token: tokenForRequest
+                    },function(error,response)
+                    {
+                        if(!error){
+                            res.render(path.join(__dirname + '/configure'),{userId:payload.userId, token: tokenForRequest, groups: response, outingTypes: outingTypes});
+                        }
+                        else
+                            console.log(error);
+                    });
+            }
+        });
+
+        res.locals.eventTokenPayload = payload;
+    }
+    else
+        res.sendStatus(403)
+});
+
+app.post('/configure', function(req, res){
+   console.log(req.body);
+    var data = req.body;
+    con.query('INSERT INTO configuration SET ?', data, function(err,response){
+        if(err) {
+            res.render(path.join(__dirname + '/failurePage'),{message: 'Configuration of application was not successful'});
+            throw err;
+        } else
+        {
+            res.render(path.join(__dirname + '/successPage'),{message: 'Configuration of application was successful'});
+        }
+    });
+
 });
 
 // Start the listener after reading the port from config

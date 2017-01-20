@@ -1,3 +1,8 @@
 create database outings;
 use outings;
 CREATE TABLE tokens (uid VARCHAR(100), token VARCHAR(100))
+CREATE TABLE outingFrequency (id INT NOT NULL AUTO_INCREMENT PRIMARY KEY, displayName VARCHAR(100), numberOfDays INT);
+INSERT INTO outingFrequency(displayName, numberOfDays) values('Beginning of month',30);
+INSERT INTO outingFrequency(displayName, numberOfDays) values('End of month',30);
+INSERT INTO outingFrequency(displayName, numberOfDays) values('Its adhoc, we never know',0);
+CREATE TABLE configuration (id INT NOT NULL AUTO_INCREMENT PRIMARY KEY, groupId VARCHAR(100), outingFrequency VARCHAR(5), userId VARCHAR(100));
