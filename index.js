@@ -3,15 +3,32 @@ var config = require('./config.js');
 var express = require('express');
 var fs = require('fs');
 var mysql = require("mysql");
-
+var request = require('request');
+var path = require('path');
 flock.setAppId(config.appId);
 flock.setAppSecret(config.appSecret);
 
 var app = express();
+app.set('view engine','ejs');
 
 // Listen for events on /events, and verify event tokens using the token verifier.
 app.use(flock.events.tokenVerifier);
 app.post('/events', flock.events.listener);
+app.get('/configure',function(req, res) {
+    var token = req.get('x-flock-validation-token') || req.query.flockValidationToken;
+    if (token) {
+        var payload = flock.events.verifyToken(token);
+        if (!payload) {
+            console.log('Invalid event token', token);
+            res.sendStatus(403);
+            return;
+        }
+        res.render(path.join(__dirname + '/configure'),{userId:payload.userId});
+        res.locals.eventTokenPayload = payload;
+    }
+    else
+        res.sendStatus(403)
+});
 var con = mysql.createConnection({
     host: config.mysqlHost,
     user: config.mysqlUser,
@@ -51,6 +68,11 @@ flock.events.on('app.uninstall', function (event) {
 var port = config.port || 8080;
 app.listen(port, function () {
     console.log('Listening on port: ' + port);
+});
+app.use(function(req, res, next) {
+    res.header("Access-Control-Allow-Origin", "*");
+    res.header("Access-Control-Allow-Headers", "X-APP-TOKEN");
+    next();
 });
 
 // exit handling -- save tokens in token.js before leaving

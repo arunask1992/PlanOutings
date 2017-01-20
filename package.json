@@ -9,10 +9,10 @@
     "url": "https://github.com/arunask1992/PlanOutings.git"
   },
   "dependencies": {
+    "ejs": "^2.5.5",
     "express": "^4.14.0",
     "flockos": "^0.0.4",
     "mysql": "^2.12.0"
   },
-  "devDependencies": {
-  }
+  "devDependencies": {}
 }
