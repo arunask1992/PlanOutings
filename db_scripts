@@ -1,0 +1,3 @@
+create database outings;
+use outings;
+CREATE TABLE tokens (uid VARCHAR(100), token VARCHAR(100))

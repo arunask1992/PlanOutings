@@ -1,0 +1,18 @@
+{
+  "name": "PlanOutings",
+  "version": "1.0.0",
+  "description": "Source code for Flockathon",
+  "main": "index.js",
+  "license": "ISC",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/arunask1992/PlanOutings.git"
+  },
+  "dependencies": {
+    "express": "^4.14.0",
+    "flockos": "^0.0.4",
+    "mysql": "^2.12.0"
+  },
+  "devDependencies": {
+  }
+}
