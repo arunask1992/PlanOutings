@@ -101,15 +101,32 @@ app.get('/configure',function(req, res) {
 app.post('/configure', function(req, res){
    console.log(req.body);
     var data = req.body;
-    con.query('INSERT INTO configuration SET ?', data, function(err,response){
-        if(err) {
-            res.render(path.join(__dirname + '/failurePage'),{message: 'Configuration of application was not successful'});
-            throw err;
-        } else
-        {
-            res.render(path.join(__dirname + '/successPage'),{message: 'Configuration of application was successful'});
+    con.query('SELECT * FROM configuration WHERE userId=?',[data.userId], function(err, response){
+        if(err) throw err;
+        else {
+            if (response.length == 0) {
+                con.query('INSERT INTO configuration SET ?', data, function (err, response) {
+                    if (err) {
+                        res.render(path.join(__dirname + '/failurePage'), {message: 'Configuration of application was not successful'});
+                        throw err;
+                    } else {
+                        res.render(path.join(__dirname + '/successPage'), {message: 'Configuration of application was successful'});
+                    }
+                });
+            }
+            else {
+                con.query('UPDATE configuration SET groupId=?,outingFrequency=? where userId=?', [data.groupId, data.outingFrequency, data.userId], function (err, response) {
+                    if (err) {
+                        res.render(path.join(__dirname + '/failurePage'), {message: 'Configuration of application was not successful'});
+                        throw err;
+                    } else {
+                        res.render(path.join(__dirname + '/successPage'), {message: 'Configuration of application was successful'});
+                    }
+                })
+            }
         }
     });
+
 
 });
 
