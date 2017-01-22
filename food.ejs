@@ -22,7 +22,9 @@ function getLocation() {
     }
 }
 function fetchRestaurants(position){
+  position = {coords: {latitude: 12.9760, longitude: 80.2212}}
   var latlng='lat='+position.coords.latitude + "&lon="+position.coords.longitude;
+
   var xhttp = new XMLHttpRequest();
   xhttp.onreadystatechange = function() {
     if (this.readyState == 4 && this.status == 200) {

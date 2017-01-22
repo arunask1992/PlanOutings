@@ -6,7 +6,7 @@ var mysql = require("mysql");
 var request = require('request');
 var path = require('path');
 var cheerio = require('cheerio');
-var async=require("async");
+var async = require("async");
 var cron = require('node-schedule');
 var moment = require('moment');
 flock.setAppId(config.appId);
@@ -38,10 +38,10 @@ con.connect(function (err) {
 
 var outingTypes;
 var configuration;
-function loadConfiguration(groupId){
-    con.query('SELECT * from configuration WHERE groupId=?',[groupId], function (err, response) {
+function loadConfiguration(groupId) {
+    con.query('SELECT * from configuration WHERE groupId=?', [groupId], function (err, response) {
         if (err) throw err;
-        else if(response.length > 0){
+        else if (response.length > 0) {
             configuration = response[0];
         }
         return configuration;
@@ -74,19 +74,17 @@ flock.events.on('app.uninstall', function (event) {
     })
 });
 
-function checkTime(){
-    var date=new Date();
+function sendReminderForNonAdhocOutings() {
+    var date = new Date();
     const LONG_SINCE_LAST_OUTING_MESSAGE = 'Its very long since you had your last outing, check out what you can try this time';
-    var event_id,participant_id,location,createdBy,venue_id,createdBy_name;
-    con.query('Select * from groupActivities',function(err,rows){
-        if(err) throw err;
-        if(rows.length>0)
-        {
-            for(var i=0;i<rows.length;i++)
-            {
+    const OUTING_COMPLETE_MESSAGE = 'Well the outing went good, but uploading pics in this group helps me keep it safe for future memories.. not just memories you can use me to keep track of bills too';
+    var event_id, participant_id, location, createdBy, venue_id, createdBy_name;
+    con.query('Select * from groupActivities', function (err, rows) {
+        if (err) throw err;
+        if (rows.length > 0) {
+            for (var i = 0; i < rows.length; i++) {
                 configuration = loadConfiguration(rows[i].groupId);
-                if(moment().diff(moment(rows[i].lastReceivedMessageTime),'days')==0 && !!configuration && (configuration['outingFrequency'] == 1 || configuration['outingFrequency'] == 2))
-                {
+                if (moment().diff(moment(rows[i].lastReceivedMessageTime), 'days') == 23 && !!configuration && (configuration['outingFrequency'] == 1 || configuration['outingFrequency'] == 2)) {
                     var options = {
                         uri: configuration['incomingHookUrl'],
                         method: 'POST',
@@ -109,22 +107,28 @@ function checkTime(){
                             console.log('Posted'); // Print the shortened url.
                         }
                     });
+                } else if (moment().diff(moment(rows[i].lastReceivedMessageTime), 'minutes') >= 720) {
+                    var options = {
+                        uri: configuration['incomingHookUrl'],
+                        method: 'POST',
+                        json: {
+                            "text": OUTING_COMPLETE_MESSAGE,
+                        }
+                    };
+
+
+                    request(options, function (error, response, body) {
+                        if (!error && response.statusCode == 200) {
+                            console.log('Posted complete message'); // Print the shortened url.
+                        }
+                    });
                 }
             }
         }
     });
 }
-checkTime();
-var eventReminder = cron.scheduleJob("00 *  * * *", function(){
-    checkTime();
-
-});
-function sendReminderForNonAdhocOutings(){
-    var date=new Date();
-
-}
-sendReminderForNonAdhocOutings
-var remindOuting = cron.scheduleJob("00 * * * *", function(){
+sendReminderForNonAdhocOutings();
+var remindOuting = cron.scheduleJob("00 * * * *", function () {
     sendReminderForNonAdhocOutings();
 });
 
@@ -192,7 +196,7 @@ app.post('/callback', function (req, res) {
                                         "title": "Movies showing around you",
                                         "description": "List of movies based on your location",
                                         "views": {
-                                            "widget": {"src": config.siteAddress + '/movies', height: 400}
+                                            "widget": {"src": config.siteAddress + '/food', height: 400}
                                         }
                                     }]
                             }
@@ -264,20 +268,19 @@ app.listen(port, function () {
     console.log('Listening on port: ' + port);
 });
 
-app.get('/scrape',function(req,res){
-    var city=req.query.city;
+app.get('/scrape', function (req, res) {
+    var city = req.query.city;
     console.log(city);
-    var link,movies=[],title;
-    url="https://www.ticketnew.com/"+city+'/movies';
+    var link, movies = [], title;
+    url = "https://www.ticketnew.com/" + city + '/movies';
     console.log(url);
-    request(url, function(error, response, html){
+    request(url, function (error, response, html) {
 
-        if(!error && response.statusCode==200){
+        if (!error && response.statusCode == 200) {
             var $ = cheerio.load(html);
-            var mainClass=$('.theatre_sections');
-            for(var i=0;i<mainClass.length;i++)
-            {
-                link=mainClass.eq(i).first().find('a').attr('href');
+            var mainClass = $('.theatre_sections');
+            for (var i = 0; i < mainClass.length; i++) {
+                link = mainClass.eq(i).first().find('a').attr('href');
                 movies.push({
                     link: link,
                 });
@@ -290,49 +293,50 @@ app.get('/scrape',function(req,res){
             throw error;
     });
 });
-app.get('/download.png',function(req,res){
+app.get('/download.png', function (req, res) {
     res.sendFile(path.join(__dirname + '/download.png'));
 });
 app.post('/scrapeImage', function (req, res) {
     "use strict";
-    let urls = [],movies=[];
-    var links=req.body,counter=0;
+    let urls = [], movies = [];
+    var links = req.body, counter = 0;
     for (let y = 0; y < links.length; y++) {
         urls.push(links[y].link);
     }
 
     function httpGet(url, callback) {
         const options = {
-            url :  url,
-            json : true
+            url: url,
+            json: true
         };
         request(options,
-            function(err, res, html) {
-                if(html){
-                    var $$=cheerio.load(html);
-                    let status="";
-                    let mainId=$$('#divMoviedetails');
-                    let img=$$('.mov_img_b').find('img').attr('src') || $$('.movie-info-image').find('img').attr('src');
-                    let movieDetails=mainId.eq(1);
-                    let title=$$('span[itemprop="name"]').attr('title')|| $$('.movie_info_b_l_info h3').text();
-                    let language=$$('span[itemprop="inLanguage"]').html()|| $$('.sub_til >ul>li').first().text();
-                    if($$('#movies-date-container').length)
-                        status='Now showing';
+            function (err, res, html) {
+                if (html) {
+                    var $$ = cheerio.load(html);
+                    let status = "";
+                    let mainId = $$('#divMoviedetails');
+                    let img = $$('.mov_img_b').find('img').attr('src') || $$('.movie-info-image').find('img').attr('src');
+                    let movieDetails = mainId.eq(1);
+                    let title = $$('span[itemprop="name"]').attr('title') || $$('.movie_info_b_l_info h3').text();
+                    let language = $$('span[itemprop="inLanguage"]').html() || $$('.sub_til >ul>li').first().text();
+                    if ($$('#movies-date-container').length)
+                        status = 'Now showing';
                     else
-                        status='Coming soon';
+                        status = 'Coming soon';
                     movies.push({
-                        title:title,
-                        img:img,
-                        language:language,
-                        status:status,
-                        url:url
+                        title: title,
+                        img: img,
+                        language: language,
+                        status: status,
+                        url: url
                     });
                     callback(err, movies);
                 }
             }
         );
     }
-    async.map(urls, httpGet, function (err, res1){
+
+    async.map(urls, httpGet, function (err, res1) {
         if (err) return console.log(err);
         console.log(movies.length);
         res.send(movies);
@@ -343,7 +347,6 @@ app.use(function (req, res, next) {
     res.header("Access-Control-Allow-Headers", "X-APP-TOKEN");
     next();
 });
-
 
 
 // exit handling -- save tokens in token.js before leaving
