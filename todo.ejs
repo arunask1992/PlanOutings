@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title></title>
+
+    <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/bootstrap/3.3.1/css/bootstrap.min.css">
+    <style>
+        body { padding-top:50px;
+        }
+        [id^='task-']{
+          background-color: #000000;
+        }
+        [id^='task-'] li{
+          list-style-type:none;
+        }
+
+   </style>
+
+</head>
+<body>
+
+    <div class="container">
+            <h1 style='text-align:center'>Your ToDo's</h1>
+           <div id='tasks' style='background-color:silver'>
+                <% rows=JSON.parse(rows); %>
+               <% if(rows.length>0)
+                for(var i=0; i<rows.length; i++) {%>
+               <br>
+     <div id='task-'+i style='width:300px'>
+      <li style='float:left'><%= rows[i].task %></p>
+      <li style='float:right'><%= moment(rows[i].dueOn).fromNow(); %> </p>
+    </div>
+    <div style="clear: both;"></div>
+        <!--<a href='/delete?task=<%= rows[i].task %>&userId=<%= userId%>' ><%= rows[i].task %></a></td>
+       <td><%= moment(rows[i].dueOn).format('D/M/YYYY');%></td>
+       <td><%= moment(rows[i].dueOn).fromNow(); %></td>
+    </tr>-->
+     <% } %>
+            </div>
+            <form action='https://bacccc68.ngrok.io/addTask' method="GET">
+                <input name='task' id='newTask' type='text'/>
+                <input type='date' name='date'/>
+                <input type='hidden' name='userId' value= <%= userId %> >
+                <button type='submit'>Submit</button>
+            </form>
+    </div>
+
+</body>
+</html>

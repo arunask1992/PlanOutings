@@ -1,5 +1,13 @@
 create database outings;
 use outings;
+[22/01/2017 6:52 PM] Nandhini S: Schema: event_id(primary key), createdBy(creator's id),createdBy_name,location,time,venue_id,event_type
+
+[22/01/2017 6:52 PM] Nandhini S: event_participants table
+
+[22/01/2017 6:52 PM] Nandhini S: event_id(foreign key), participant_id(varchar(50)) participant_name
+
+CREATE TABLE events (event_id INT NOT NULL AUTO_INCREMENT PRIMARY KEY, createdBy VARCHAR(100), createdBy_name VARCHAR(200), location VARCHAR(100), time timestamp, venue_id varchar(50), event_type varchar(300));
+CREATE TABLE event_participants (event_id INT, participant_id VARCHAR(100), participant_name VARCHAR(300));
 CREATE TABLE tokens (uid VARCHAR(100), token VARCHAR(100));
 CREATE TABLE outingFrequency (id INT NOT NULL AUTO_INCREMENT PRIMARY KEY, displayName VARCHAR(100), numberOfDays INT);
 INSERT INTO outingFrequency(displayName, numberOfDays) values('Beginning of month',30);

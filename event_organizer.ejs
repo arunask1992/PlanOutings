@@ -1,0 +1,371 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title></title>
+    <script src="https://code.jquery.com/jquery-1.9.1.js"></script>
+<script src="https://code.jquery.com/ui/1.10.3/jquery-ui.js"></script>
+<script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.4.8/angular.min.js"></script>
+
+    <script type='text/javascript' src='https://mugifly.github.io/jquery-simple-datetimepicker/jquery.simple-dtpicker.js'></script>
+    <link type="text/css" href="https://mugifly.github.io/jquery-simple-datetimepicker/jquery.simple-dtpicker.css" rel="stylesheet">
+    <link type='text/css' href='https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css' rel='stylesheet'>
+    <script type='text/javascript' src='https://apps-static.flock.co/js-sdk/0.1.0/flock.js'></script>
+    <style>
+    #suggest {
+    z-index: 999;
+    display:none;
+    background: #fff;
+    padding: 10px;
+    border: 1px solid #969696;
+    cursor: pointer;
+    border-top:none;
+}
+.ui-autocomplete{
+    position:relative;
+    top:0;
+    left:0;
+    width:406px;
+    border-radius:0;
+    -moz-border-radius:0;
+    border-top:none;
+    border-color:#969696;
+}
+
+        button{
+          border-radius:5px;
+        }
+        #participantSuggestion{
+          margin:0;
+          position: relative;
+          top:-15px;
+          cursor:pointer;
+        }
+        #participantSuggestion:hover{
+          background-color: #e2dede;
+        }
+
+        [id^='venue']:hover{
+          background-color: #e2dede;
+        }
+        [id^='venue']{
+          cursor:pointer;
+        }
+        [id^='rowbutton ']{
+          background-color:Transparent;
+    background-repeat:no-repeat;
+    border: none;
+    cursor:pointer;
+    overflow: hidden;
+    outline:none;
+        }
+        [id^='row ']{
+          cursor:pointer;
+          border-radius:2px;
+          width:100%;
+        }
+        [id^='row ']:hover{
+          background-color: #e2dede;
+        }
+        #suggest li{
+          list-style-type:none;
+        }
+        time.icon
+{
+  float:left;
+  font-size: 1em; /* change icon size */
+  display: block;
+  position: relative;
+  width: 4em;
+  height:4em;
+  background-color: #fff;
+  border-radius: 0.6em;
+  box-shadow: 0 1px 0 #bdbdbd, 0 2px 0 #fff, 0 3px 0 #bdbdbd, 0 4px 0 #fff, 0 5px 0 #bdbdbd, 0 0 0 1px #bdbdbd;
+  overflow: hidden;
+}
+time.icon *
+{
+  display: block;
+  width: 100%;
+  font-size: 1em;
+  font-weight: bold;
+  font-style: normal;
+  text-align: center;
+}
+time.icon strong
+{
+
+  position: absolute;
+    top: 0;
+    padding: 0;
+    color: #fff;
+    background-color: #fd9f1b;
+    border-bottom: 1px dashed #f37302;
+    box-shadow: 0 2px 0 #fd9f1b;
+}
+time.icon em
+{
+      position: absolute;
+    bottom: 0;
+    color: #fd9f1b;
+    font-size: 0.8em;
+}
+time.icon span
+{
+  font-size: 1.4em;
+    letter-spacing: 0em;
+    padding-top: 1em;
+    color: #2f2f2f;
+}
+#upComingEvents{
+  margin:0;
+}
+   </style>
+   <script>
+
+   var obj,oData;
+   function getContacts()
+   {
+    var userId= document.getElementById('userId').value;
+      var xhttp = new XMLHttpRequest();
+      xhttp.onreadystatechange = function() {
+      if (this.readyState == 4 && this.status == 200) {
+        if(obj==='Not a user'){
+          $('#addEvent').remove();
+          $('#newEvent').remove();
+        }
+      obj=JSON.parse(this.responseText);
+      console.log(obj);
+
+    }
+  };
+  xhttp.open("GET", "https://bacccc68.ngrok.io/getContacts?userId="+userId, true);
+  xhttp.send();
+   }
+      function search_suggest()
+    {
+      var client_id='10C4S0MMP2ZCTX3ACXKZ3YUSCGZXCOTXLTTOI2WVJ3WTIMH1';
+      var client_secret='T4YM5HKKRQCM1T1KQJPBMHDGPVTVBA1N3ID3NMCHIYNQDI2Q';
+      var query=$('#location').val();
+      if(query.length>=3)
+      {
+        document.getElementById('suggest').style.display='block';
+        $('#suggest li').remove();
+        var i;
+        url='https://api.foursquare.com/v2/venues/suggestcompletion?near=chennai&query='+query+'&v=20140806&client_id='+client_id+'&client_secret='+client_secret;
+        $.ajax(url,{
+            complete:function(xHTTP,status){
+                oData=$.parseJSON(xHTTP.responseText);
+                console.log(oData);
+                $('#suggest li').remove();
+                var upperlimit=oData.response.minivenues.length<5?oData.response.minivenues.length:5;
+                for(i=0;i<upperlimit;i++)
+                {
+                  if("address" in oData.response.minivenues[i].location)
+                    $('#suggest').append('<li id="venue-'+oData.response.minivenues[i].id+'">'+oData.response.minivenues[i].name+', Location:'+oData.response.minivenues[i].location.address+'</li>');
+                  else
+                    $('#suggest').append('<li id="venue-'+oData.response.minivenues[i].id+'">'+oData.response.minivenues[i].name+'</li>');
+                }
+                $('[id^="venue-"]').click(function(){
+        var id=event.target.id;
+        id=id.substr(id.indexOf('-')+1,id.length-1);
+        document.getElementById('location').value=this.innerHTML;
+        document.getElementById('venue_id').value=id;
+        $('#suggest li').remove();
+        document.getElementById('suggest').style.display='none';
+
+      })
+
+              }
+            });
+      }
+    }
+
+    function loadUserSuggestions()
+    {
+      document.getElementById('participantSuggestion').innerHTML="";
+      var q=document.getElementById('participants').value;
+      if(q.length>1)
+      {
+      q=q.substr(q.lastIndexOf(',')+1).toUpperCase();
+      for(var i=0;i<obj.length;i++)
+      {
+        var temp=obj[i].firstName.toUpperCase();
+    if(temp.indexOf(q)===0)
+
+      document.getElementById('participantSuggestion').innerHTML+='<li id="suggestion" class="suggest" style="list-style-type:none;">'+obj[i].firstName+'</button>';
+      }
+      $('.suggest').click(function(){
+        var str=document.getElementById('participants').value;
+        str = str.substr(0, str.lastIndexOf(","));
+        if(str!="")
+        document.getElementById('participants').value=str+','+this.innerHTML+',';
+      else
+        document.getElementById('participants').value=this.innerHTML+','
+      document.getElementById('participantSuggestion').innerHTML="";
+      });
+    }
+    }
+    function getPartcipantId()
+    {
+      var participants=document.getElementById('participants').value.split(',');
+      var participants_id="";
+      var participant,participants_array=[];
+      for(var i=0;i<participants.length-1;i++)
+      {
+        var object=obj.filter(function ( object ) {
+        return object.firstName === participants[i];
+})[0];
+        participants_id+=object.id+',';
+        participant={participant_id:object.id,participant_name:object.firstName};
+        participants_array.push(participant);
+        console.log(participants);
+        if(object.id===undefined)
+          return false;
+      }
+      document.getElementById('participants_id').value=JSON.stringify(participants_array);
+    }
+    function showForm()
+    {
+      document.getElementById('addEvent').style.display='block';
+     }
+     function deleteEvent(id)
+     {
+      var url="";
+      id=id.substr(id.indexOf(' '),id.length);
+      var userId= document.getElementById('userId').value;
+      url="https://bacccc68.ngrok.io/delete?event_id="+id+'&user_id='+userId+'&username=<%=username%>';
+      location.href=url;
+   }
+     </script>
+ </head>
+ <body onload='getContacts();'>
+
+  <% if(typeof added!== 'undefined') {%>
+  <div class="alert alert-success">
+  <strong>Event was added successfully</strong> .
+</div>
+<% } %>
+  <% if(typeof deleted!== 'undefined') {%>
+  <div class="alert alert-success">
+  <strong>Event was deleted successfully</strong> .
+</div>
+<% } %>
+  <div id='upComingEvents'>
+    <hr>
+    <div id='header'>
+      <% rows=JSON.parse(rows);
+      function isEmptyObject(obj) {
+  for (var key in obj) {
+    if (Object.prototype.hasOwnProperty.call(obj, key)) {
+      return false;
+    }
+  }
+  return true;
+}
+if(!isEmptyObject(rows)){ %>
+  <h4 style='float:left;margin-left:5px'>Upcoming events</h4><button id='newEvent' style='float:right;margin-top:10px;margin-right:5px;margin-bottom:8px' onClick='showForm();' class='btn-primary'><span class='glyphicon glyphicon-plus'></span></button><hr style='clear:both'></div>
+
+<% for(var key in rows){ %>
+
+    <%
+  if(moment(rows[key][0].time).diff(moment(),'days')==0){%>
+      <div id='row <%=key%>' class='today'>
+        <% } else if(moment(rows[key][0].time).diff(moment(),'days')<=7) {%>
+         <div id='row <%=key%>' class='week'>
+         <% } else if(moment(rows[key][0].time).diff(moment(),'days')<=30) {%>
+          <div id='row <%=key%>' class='month'>
+            <% } else {%>
+            <div id='row <%=key%>' class='other'>
+              <% } %>
+  <button type='button' id='rowbutton <%=key%>' style='float:right;color:grey;display:none' class='btn-xs'>&#10006;
+  </button><br>
+    <b><p style='float:left'>Event Type:</b> <%= rows[key][0].event_type %></p>
+  <% if(rows[key][0].createdBy===userId) {%>
+  <p style='float:right'>Created By You</p>
+  <% } else{ %>
+  <p style='float:right'>Created By <%=rows[key][0].createdBy_name %></p>
+  <% } %>
+   <b><p style='float:left'>Scheduled </b><%= moment(rows[key][0].time).fromNow() %></p>
+  <b><p style='clear:both;'>Venue:</b> <%= rows[key][0].location %></p>
+  <b><p>Participants:</b>
+  <% for(var j=0;j<rows[key].length;j++){ %>
+  <% if(rows[key][j].participant_name==null){ %>No participants</p><% break;} %><%= rows[key][j].participant_name %>
+  <% } %></p>
+  <br>
+ </div> <hr style='clear:both'>
+  <% }}else { %>
+  <h4 style='float:left;margin-top:0px'>You don't have any upcoming events</h4><button id='newEvent' style='float:right' onClick='showForm();' class='btn-primary'><span class='glyphicon glyphicon-plus'></span>  &nbsp Click to add a new Event</button></div>
+    <div style='clear:both'></div>
+
+<% } %>
+
+
+
+</div>
+    <div id='addEvent' style='display:none'>
+  <h4>Create new event</h4>
+  <hr>
+  <form action='https://bacccc68.ngrok.io/addEvent' method="POST">
+    <div class='form-group'>
+    <label for='eventType'>Event type: </label>
+   <input name='eventType' id='eventType' type='text' class='form-control' autofocus autocomplete='off' required>
+ </div>
+ <div class='form-group'>
+    <label for='participants'>People invited:</label>
+    <input name='participants' id='participants' class='form-control' type='text' onkeydown='loadUserSuggestions()' autocomplete='off' required/>
+  </div>
+     <div id='participantSuggestion'></div>
+    <div class='form-group'>
+      <label for='date'>Date:</label>
+    <input type="text" name='date' class='form-control' id='date' autocomplete='off' required/>
+  </div>
+    <script> $(document).ready(function(){
+      $('#date').appendDtpicker({
+        closeOnSelected: true,
+        futureOnly:true,
+        autodateOnStart:false
+      });
+      $( "#suggest" ).autocomplete({
+  appendTo: "#location",
+  autofocus:true
+});
+      $('[id^="rowbutton"]').click(function(){
+      deleteEvent(event.target.id);
+     });
+      $( "#upComingEvents .today" ).wrapAll( "<div class='Today' />");
+      if($('.Today').length>0)
+      {
+        var datetime='<time  class="icon"><em><%= moment().format("ddd"); %></em>'+'<strong><%=moment().format("MMM"); %></strong>'+'<span'+'><%= moment().date() %></span></time>';
+          $('.Today').prepend('<div id="header">'+datetime+'<br><h4>&nbsp TODAY</h4></div><hr style="clear:both">');
+      }
+       $( "#upComingEvents .week" ).wrapAll( "<div class='Week' />");
+       if($('.Week').length>0)
+       $('.Week').prepend('<h4><b>This Week</b></h4><hr>');
+       $( "#upComingEvents .month" ).wrapAll( "<div class='Month' />");
+       if($('.Month').length>0)
+        $('.Month').prepend('<h4><b>This Month</b></h4><hr>');
+       $("#upComingEvents .other").wrapAll('<div class="Other" />');
+       if($('.Other').length>0)
+        $('.Other').prepend('<h4><b>Other Events</h4></b><hr>');
+       $('[id^="row "]').on('hover',function(){
+        $('[id^="rowbutton "]').show();
+       });
+        $('[id^="row "]').on('mouseleave',function(){
+        $('[id^="rowbutton "]').hide();
+       });
+    });
+    </script>
+    <div class='form-group'>
+    <label for='location'>Venue: </label>
+    <input name='location' id='location' class='form-control ui-autocomplete-input' type='text' required onkeydown='search_suggest();' autocomplete='off'/>
+    <div id='suggest'></div>
+  </div>
+    <input type='hidden' name='userId' id='userId' value= <%= userId %> >
+    <input type='hidden' name='username' value= <%= username %> >
+    <input type='hidden' name='participants_id' id='participants_id'>
+    <input type='hidden' name='venue_id' id='venue_id'>
+    <button type='buttom' onClick='getPartcipantId();' class='btn-primary btn-block'>Invite</button>
+  </form>
+</div>
+</body>

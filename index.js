@@ -8,11 +8,13 @@ var path = require('path');
 var cheerio = require('cheerio');
 var async = require("async");
 var cron = require('node-schedule');
+var groupArray = require('group-array');
 var moment = require('moment');
 flock.setAppId(config.appId);
 flock.setAppSecret(config.appSecret);
 
 var app = express();
+app.locals.moment = moment;
 app.set('view engine', 'ejs');
 var bodyParser = require('body-parser');
 app.use(bodyParser.json()); // support json encoded bodies
@@ -73,6 +75,61 @@ flock.events.on('app.uninstall', function (event) {
         console.log('deleted ');
     })
 });
+function checkTime(){
+    var date=new Date();
+    var event_id,participant_id,location,createdBy,venue_id,createdBy_name;
+    con.query('Select * from events',function(err,rows){
+        if(err) throw err;
+        if(rows.length>0)
+        {
+            for(var i=0;i<rows.length;i++)
+            {
+                if(moment(rows[i].time).diff(moment(),'minutes')==60)
+                {
+                    event_id=rows[i].event_id;
+                    location=rows[i].location;
+                    createdBy=rows[i].createdBy;
+                    createdBy_name=rows[i].createdBy_name;
+                    event_type=rows[i].event_type;
+                    venue_id=rows[i].venue_id;
+                    con.query('select * from event_participants where event_id=?',event_id,function(err,res){
+                        console.log(err);
+                        for(var j=0;j<res.length;j++)
+                        {
+                            participant_id=res[j].participant_id;
+                            console.log(participant_id);
+                            flock.callMethod('chat.sendMessage',config.botToken,{
+                                    to:participant_id,
+                                    attachments:[{
+                                        title: "Invitation",
+                                        description: "Event Invitation",
+                                        views: {
+                                            flockml:'<flockml>This is to remind you that the event '+event_type+' at <a href="https://foursquare.com/v/'+venue_id+'">'+location+'</a> for which you were invited by <user userId="'+createdBy+'">'+createdBy_name+'</user> will take place in an hour. '
+                                        },
+                                        buttons:[{
+                                            name:'View',
+                                            action:{type:'openWidget',desktopType:'sidebar',mobileType:'sidebar',url:'https://bacccc68.ngrok.io/eventBar'},
+                                            id:'view',
+
+                                        }]
+                                    }]
+
+                                }
+                                ,function(err,response){
+                                    if(err) console.log(err);
+                                });
+                        }
+                    });
+                }
+            }
+        }
+    });
+}
+checkTime();
+var cronJob = cron.scheduleJob("00 *  * * *", function(){
+    checkTime();
+
+});
 
 function sendReminderForNonAdhocOutings() {
     var date = new Date();
@@ -115,7 +172,7 @@ function sendReminderForNonAdhocOutings() {
                             console.log('Posted'); // Print the shortened url.
                         }
                     });
-                } else if (moment().diff(moment(rows[i].lastReceivedMessageTime), 'minutes') >= 720) {
+                } else if (moment().diff(moment(rows[i].lastReceivedMessageTime), 'minutes') >= 30) {
                     var options = {
                         uri: configuration['incomingHookUrl'],
                         method: 'POST',
@@ -194,24 +251,55 @@ app.post('/callback', function (req, res) {
                     if (err) {
                         throw err;
                     } else {
-                        var options = {
+                        var foodWidgetOptions = {
                             uri: configuration['incomingHookUrl'],
                             method: 'POST',
                             json: {
                                 "text": FIRST_TIME_INSTALL_MESSAGE,
                                 "attachments": [
                                     {
-                                        "title": "Movies showing around you",
-                                        "description": "List of movies based on your location",
+                                        "title": "You could try awesome food at some of these locations",
+                                        "description": "Bringing you some of the best places near you..",
                                         "views": {
                                             "widget": {"src": config.siteAddress + '/food', height: 400}
                                         }
-                                    }]
+                                    }
+                                    // {
+                                    //     "title": "Movies showing around you",
+                                    //     "description": "Well, why dont you folks try one of these movies now ??",
+                                    //     "views": {
+                                    //         "widget": {"src": config.siteAddress + '/movies', height: 400}
+                                    //     }
+                                    // }
+                                    ]
                             }
                         };
 
 
-                        request(options, function (error, response, body) {
+                        request(foodWidgetOptions, function (error, response, body) {
+                            if (!error && response.statusCode == 200) {
+                                console.log('Posted'); // Print the shortened url.
+                            }
+                        });
+                        var moviesWidgetOptions = {
+                            uri: configuration['incomingHookUrl'],
+                            method: 'POST',
+                            json: {
+                                "text": 'Not just food sometimes movies could do the magic too !!',
+                                "attachments": [
+                                    {
+                                        "title": "Movies showing around you",
+                                        "description": "Well, why dont you folks try one of these movies now ??",
+                                        "views": {
+                                            "widget": {"src": config.siteAddress + '/movies', height: 400}
+                                        }
+                                    }
+                                ]
+                            }
+                        };
+
+
+                        request(moviesWidgetOptions, function (error, response, body) {
                             if (!error && response.statusCode == 200) {
                                 console.log('Posted'); // Print the shortened url.
                             }
@@ -361,6 +449,272 @@ app.post('/scrapeImage', function (req, res) {
         if (err) return console.log(err);
         console.log(movies.length);
         res.send(movies);
+    });
+});
+app.get('/addTask',function(req,res){
+    var userTask = { userId: req.query.userId, task: req.query.task, dueOn: req.query.date };
+
+    con.query('INSERT INTO todo SET ?', userTask, function(err,response){
+        if(err) throw err;
+        else
+        {
+            con.query('SELECT * FROM todo where userId=?',[userTask.userId],function(err,rows){
+                checkDay();
+                jrows=JSON.stringify(rows);
+                res.render(path.join(__dirname + '/todo'),{userId:userTask.userId,rows:jrows});
+            });
+
+        }
+    });
+});
+// viewed at http://localhost:8080
+app.get('/',function(req, res) {
+    var token = req.get('x-flock-event-token') || req.query.flockEventToken;
+    if (token) {
+        var payload = flock.events.verifyToken(token);
+        if (!payload) {
+            console.log('Invalid event token', token);
+            res.sendStatus(403);
+            return;
+        }
+        res.locals.eventTokenPayload = payload;
+        con.query('SELECT * FROM todo where userId=?',[payload.userId],function(err,rows){
+            jrows=JSON.stringify(rows);
+            res.render(path.join(__dirname + '/todo'),{userId:payload.userId,rows:jrows});
+        });
+    }
+    else
+        res.sendStatus(403)
+});
+
+app.get('/eventBar',function(req,res){
+    var token = req.get('x-flock-event-token') || req.query.flockEventToken;
+    var userName="";
+    if (token) {
+        var payload = flock.events.verifyToken(token);
+        if (!payload) {
+            console.log('Invalid event token', token);
+            res.sendStatus(403);
+            return;
+        }
+        res.locals.eventTokenPayload = payload;
+        con.query('select * from events,event_participants where events.event_id=event_participants.event_id and (events.createdBy=? or event_participants.participant_id=?) order by events.event_id',[payload.userId,payload.userId],function(err,res1){
+            if(!err)
+            {
+                res1=groupArray(res1,'event_id');
+                res1=JSON.stringify(res1);
+                userName=JSON.parse(req.query.flockEvent).userName;
+                console.log(userName);
+                res.render(path.join(__dirname + '/event_organizer'),{userId:payload.userId,username:userName,rows:res1});
+            }
+        })
+
+    }
+});
+app.get('/getContacts',function(req,res){
+    var userId=req.query.userId;
+    console.log(userId);
+    con.query('SELECT token from tokens where uid=?', userId, function(err,res1){
+        if(!err)
+        {
+            console.log('nice');
+            var token=res1['0'].token;
+            flock.callMethod('roster.listContacts',token,{},function(error,response){
+                if(!error)
+                    res.send(response);
+                else
+                    console.log(error);
+            });
+        }
+    });
+});
+app.get('/delete',function(req,res){
+    var event_id=req.query.event_id;
+    console.log(event_id);
+    var user_id=req.query.user_id;
+    var username=req.query.username;
+    var date,location,venue_id,createdBy,event_type;
+    con.query('Select * from events where event_id=?',event_id,function(error,response){
+        if(error) console.log(error);
+        else
+        {
+            event_type=response[0].event_type;
+            location=response[0].location;
+            venue_id=response[0].venue_id;
+            date=response.time;
+            date=moment(date).format("dddd, MMMM Do YYYY, h:mm:ss a");
+            username=response[0].createdBy_name;
+            createdBy=response[0].createdBy;
+            console.log(user_id);
+            if(createdBy===user_id)
+            {
+                console.log('delete admin');
+                con.query('select participant_id from event_participants where event_id=?',event_id,function(err,response){
+                    if(err) console.log(err);
+                    else
+                    {
+                        console.log(response);
+                        for(var i=0;i<response.length;i++){
+                            console.log('hello');
+                            console.log(response[i]);
+                            flock.callMethod('chat.sendMessage',config.botToken,{
+                                to:response[i].participant_id,
+                                //text: 'You have been invited for '+event_type+' at '+location+' by '+username,
+                                attachments:[{
+                                    title: "Cancellation of Event",
+                                    description: "Event cancellation",
+                                    views: {
+                                        flockml:'<flockml>This is to inform you that the event plan: '+event_type+' at <a href="https://foursquare.com/v/'+venue_id+'">'+location+'</a> created by <user userId="'+user_id+'">'+username+'</user> on '+date+' is cancelled due to some unavoidable reasons.'
+                                    },
+                                    buttons:[{
+                                        name:'View',
+                                        action:{type:'openWidget',desktopType:'modal',mobileType:'sidebar',url:'https://bacccc68.ngrok.io/eventBar'},
+                                        id:'view',
+
+                                    }]
+                                }]
+
+                            },function(error,response)
+                            {
+                                if(!error)
+                                    console.log(response);
+                                else
+                                    console.log(error);
+                            });
+                        }
+                        con.query('delete from events where event_id=?',event_id,function(error,res2){
+                            if(error) console.log(error);
+                            else
+                            {
+                                console.log(res2);
+                                res.send('done');
+                                /*con.query('select * from events,event_participants where events.event_id=event_participants.event_id and (events.createdBy=? or event_participants.participant_id=?) order by events.event_id',[user_id,user_id],function(err,res1){
+                                 if(!err)
+                                 {
+                                 res1=groupArray(res1,'event_id');
+                                 res1=JSON.stringify(res1);
+                                 res.render(path.join(__dirname + '/event_organizer'),{userId:user_id,username:username,rows:res1,deleted:'success'});
+                                 }
+                                 });*/
+                            }
+                        });
+                    }
+                })
+            }
+            else
+            {
+                flock.callMethod('chat.sendMessage',config.botToken,{
+                    to:createdBy,
+                    //text: 'You have been invited for '+event_type+' at '+location+' by '+username,
+                    attachments:[{
+                        title: "Decline event invitation",
+                        description: "",
+                        views: {
+                            flockml:'<flockml>This is to inform you that <user userId="'+user_id+'">'+username+'</user>'+event_type+' at <a href="https://foursquare.com/v/'+venue_id+'">'+location+'</a> created by you on '+date+' due to some unavoidable reasons.'
+                        },
+                        buttons:[{
+                            name:'View',
+                            action:{type:'openWidget',desktopType:'modal',mobileType:'sidebar',url:'https://bacccc68.ngrok.io/eventBar'},
+                            id:'view',
+
+                        }]
+                    }]
+
+                },function(error,response)
+                {
+                    if(!error)
+                    {
+                        con.query('delete from event_participants where participant_id=?',user_id,function(err,resD){
+                            if(err) console.log(err);
+                            else
+                            {
+                                con.query('select * from events,event_participants where events.event_id=event_participants.event_id and (events.createdBy=? or event_participants.participant_id=?) order by events.event_id',[user_id,user_id],function(err,res1){
+                                    if(!err)
+                                    {
+                                        res1=groupArray(res1,'event_id');
+                                        res1=JSON.stringify(res1);
+                                        res.render(path.join(__dirname + '/event_organizer'),{userId:user_id,username:username,rows:res1,deleted:'success'});
+                                    }
+                                });
+                            }
+                        });
+                    }
+                    else
+                        console.log(error);
+                });
+            }
+        }
+    });
+
+});
+app.post('/addEvent',function(req,res){
+    var username='';
+    var event_type=req.body.eventType;
+    var participants=JSON.parse(req.body.participants_id);
+    var date=req.body.date;
+    var venue_id=req.body.venue_id;
+    var location=req.body.location;
+    var userId=req.body.userId;
+    var participant,token;
+    var username=req.body.username;
+    var events={event_type:event_type,location:location,venue_id:venue_id,createdBy:userId,time:date,createdBy_name:username}
+    con.query('INSERT into events set ?',events,function(error,response){
+        if(!error)
+        {
+            console.log('event added');
+            var event_id=response.insertId;
+            participants=participants.map(function(val){
+                participant={event_id:event_id,participant_id:val.participant_id,participant_name:val.participant_name};
+                con.query('SELECT token from tokens where uid=?', userId, function(err,res1){
+                    if(!err)
+                    {
+                        token=res1['0'].token;
+                        console.log(token);
+                    }});
+                con.query('INSERT into event_participants set ?',participant,function(error,response)
+                {
+                    if(!error)
+                    {
+                        date=moment(date).format("dddd, MMM YYYY, h:mm:ss a");
+                        flock.callMethod('chat.sendMessage',token,
+                            {
+                                to:val.participant_id,
+                                //text: 'You have been invited for '+event_type+' at '+location+' by '+username,
+                                attachments:[{
+                                    title: "Invitation",
+                                    description: "",
+                                    views: {
+                                        flockml:'<flockml>You have been invited for '+event_type+' at <a href="https://foursquare.com/v/'+venue_id+'">'+location+'</a> by <user userId="'+userId+'">'+username+'</user> on '+date
+                                    },
+                                    buttons:[{
+                                        name:'View',
+                                        action:{type:'openWidget',desktopType:'modal',mobileType:'sidebar',url:'https://bacccc68.ngrok.io/eventBar'},
+                                        id:'view',
+
+                                    }]
+                                }]
+
+                            },function(error,response)
+                            {
+                                if(!error)
+                                    console.log(response);
+                                else
+                                    console.log(error);
+                            });
+                        con.query('select * from events,event_participants where events.event_id=event_participants.event_id and (events.createdBy=? or event_participants.participant_id=?) order by events.event_id',[userId,userId],function(err,res1){
+                            if(!err)
+                            {
+                                res1=groupArray(res1,'event_id');
+                                res1=JSON.stringify(res1);
+                                res.render(path.join(__dirname + '/event_organizer'),{userId:userId,username:username,rows:res1,added:'success'});
+                            }
+                        })
+                    }
+                    else console.log(error);
+                });
+
+            });
+        }
     });
 });
 app.use(function (req, res, next) {
