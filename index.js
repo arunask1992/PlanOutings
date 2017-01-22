@@ -143,7 +143,7 @@ function sendReminderForNonAdhocOutings() {
                 configuration = loadConfiguration(rows[i].groupId);
                 if (moment().diff(moment(rows[i].lastReceivedMessageTime), 'days') == 23 && !!configuration && (configuration['outingFrequency'] == 1 || configuration['outingFrequency'] == 2)) {
                     var options = {
-                        uri: configuration['incomingHookUrl'],
+                        uri: config.incomingHookUrl,
                         method: 'POST',
                         json: {
                             "text": LONG_SINCE_LAST_OUTING_MESSAGE,
@@ -174,7 +174,7 @@ function sendReminderForNonAdhocOutings() {
                     });
                 } else if (moment().diff(moment(rows[i].lastReceivedMessageTime), 'minutes') >= 30) {
                     var options = {
-                        uri: configuration['incomingHookUrl'],
+                        uri: config.incomingHookUrl,
                         method: 'POST',
                         json: {
                             "text": OUTING_COMPLETE_MESSAGE,
@@ -193,7 +193,7 @@ function sendReminderForNonAdhocOutings() {
     });
 }
 sendReminderForNonAdhocOutings();
-var remindOuting = cron.scheduleJob("00 * * * *", function () {
+var remindOuting = cron.scheduleJob("*/10 * * * *", function () {
     sendReminderForNonAdhocOutings();
 });
 
