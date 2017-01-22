@@ -7,6 +7,8 @@ var request = require('request');
 var path = require('path');
 var cheerio = require('cheerio');
 var async=require("async");
+var cron = require('node-schedule');
+var moment = require('moment');
 flock.setAppId(config.appId);
 flock.setAppSecret(config.appSecret);
 
@@ -42,6 +44,7 @@ function loadConfiguration(groupId){
         else if(response.length > 0){
             configuration = response[0];
         }
+        return configuration;
     });
 }
 con.query('SELECT * from outingFrequency', function (err, response) {
@@ -69,6 +72,60 @@ flock.events.on('app.uninstall', function (event) {
         if (error) throw error;
         console.log('deleted ');
     })
+});
+
+function checkTime(){
+    var date=new Date();
+    const LONG_SINCE_LAST_OUTING_MESSAGE = 'Its very long since you had your last outing, check out what you can try this time';
+    var event_id,participant_id,location,createdBy,venue_id,createdBy_name;
+    con.query('Select * from groupActivities',function(err,rows){
+        if(err) throw err;
+        if(rows.length>0)
+        {
+            for(var i=0;i<rows.length;i++)
+            {
+                configuration = loadConfiguration(rows[i].groupId);
+                if(moment().diff(moment(rows[i].lastReceivedMessageTime),'days')==0 && !!configuration && (configuration['outingFrequency'] == 1 || configuration['outingFrequency'] == 2))
+                {
+                    var options = {
+                        uri: configuration['incomingHookUrl'],
+                        method: 'POST',
+                        json: {
+                            "text": LONG_SINCE_LAST_OUTING_MESSAGE,
+                            "attachments": [
+                                {
+                                    "title": "Movies showing around you",
+                                    "description": "List of movies based on your location",
+                                    "views": {
+                                        "widget": {"src": config.siteAddress + '/movies', height: 400}
+                                    }
+                                }]
+                        }
+                    };
+
+
+                    request(options, function (error, response, body) {
+                        if (!error && response.statusCode == 200) {
+                            console.log('Posted'); // Print the shortened url.
+                        }
+                    });
+                }
+            }
+        }
+    });
+}
+checkTime();
+var eventReminder = cron.scheduleJob("00 *  * * *", function(){
+    checkTime();
+
+});
+function sendReminderForNonAdhocOutings(){
+    var date=new Date();
+
+}
+sendReminderForNonAdhocOutings
+var remindOuting = cron.scheduleJob("00 * * * *", function(){
+    sendReminderForNonAdhocOutings();
 });
 
 app.get('/configure', function (req, res) {
