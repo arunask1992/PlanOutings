@@ -102,7 +102,7 @@ function checkTime(){
                                     to:participant_id,
                                     attachments:[{
                                         title: "Invitation",
-                                        description: "Event Invitation",
+                                        description: "Event Reminder",
                                         views: {
                                             flockml:'<flockml>This is to remind you that the event '+event_type+' at <a href="https://foursquare.com/v/'+venue_id+'">'+location+'</a> for which you were invited by <user userId="'+createdBy+'">'+createdBy_name+'</user> will take place in an hour. '
                                         },
@@ -159,7 +159,7 @@ function sendReminderForNonAdhocOutings() {
                                     "title": "Movies showing around you",
                                     "description": "Well, why dont you folks try one of these movies now ??",
                                     "views": {
-                                        "widget": {"src": config.siteAddress + '/movies', height: 400}
+                                        "widget": {"src": config.siteAddress + '/movies', height: 300, width:300}
                                     }
                                 }
                                 ]
@@ -406,6 +406,9 @@ app.get('/scrape',function(req,res){
 app.get('/download.png',function(req,res){
     res.sendFile(path.join(__dirname + '/download.png'));
 });
+app.get('/icon',function(req,res){
+  res.sendFile(path.join(__dirname + '/icon.png'))
+})
 app.post('/scrapeImage', function (req, res) {
     "use strict";
     let urls = [],movies=[];
@@ -498,7 +501,7 @@ app.get('/eventBar',function(req,res){
             return;
         }
         res.locals.eventTokenPayload = payload;
-        con.query('select * from events,event_participants where events.event_id=event_participants.event_id and (events.createdBy=? or event_participants.participant_id=?) order by events.event_id',[payload.userId,payload.userId],function(err,res1){
+        con.query('select *  from event_participants P right join events E on P.event_id=E.event_id',function(err,res1){
             if(!err)
             {
                 res1=groupArray(res1,'event_id');
@@ -588,14 +591,6 @@ app.get('/delete',function(req,res){
                             {
                                 console.log(res2);
                                 res.send('done');
-                                /*con.query('select * from events,event_participants where events.event_id=event_participants.event_id and (events.createdBy=? or event_participants.participant_id=?) order by events.event_id',[user_id,user_id],function(err,res1){
-                                 if(!err)
-                                 {
-                                 res1=groupArray(res1,'event_id');
-                                 res1=JSON.stringify(res1);
-                                 res.render(path.join(__dirname + '/event_organizer'),{userId:user_id,username:username,rows:res1,deleted:'success'});
-                                 }
-                                 });*/
                             }
                         });
                     }
@@ -628,7 +623,7 @@ app.get('/delete',function(req,res){
                             if(err) console.log(err);
                             else
                             {
-                                con.query('select * from events,event_participants where events.event_id=event_participants.event_id and (events.createdBy=? or event_participants.participant_id=?) order by events.event_id',[user_id,user_id],function(err,res1){
+                                con.query('select *  from event_participants P right join events E on P.event_id=E.event_id',function(err,res1){
                                     if(!err)
                                     {
                                         res1=groupArray(res1,'event_id');
@@ -691,6 +686,12 @@ app.post('/addEvent',function(req,res){
                                         action:{type:'openWidget',desktopType:'modal',mobileType:'sidebar',url:'https://bacccc68.ngrok.io/eventBar'},
                                         id:'view',
 
+                                    },
+                                    {
+                                         name:'Decline',
+                                         action:{type:'openWidget',desktopType:'modal',mobileType:'modal',url:'https://bacccc68.ngrok.io/delete?event_id='+event_id+'&user_id='+val.participant_id+'&username='+username},
+                                         id:'decline',
+                                        icon:'https://bacccc68.ngrok.io/icon'
                                     }]
                                 }]
 
@@ -701,7 +702,7 @@ app.post('/addEvent',function(req,res){
                                 else
                                     console.log(error);
                             });
-                        con.query('select * from events,event_participants where events.event_id=event_participants.event_id and (events.createdBy=? or event_participants.participant_id=?) order by events.event_id',[userId,userId],function(err,res1){
+                        con.query('select *  from event_participants P right join events E on P.event_id=E.event_id',function(err,res1){
                             if(!err)
                             {
                                 res1=groupArray(res1,'event_id');
