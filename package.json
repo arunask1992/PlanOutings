@@ -8,10 +8,16 @@
     "type": "git",
     "url": "https://github.com/arunask1992/PlanOutings.git"
   },
+  "scripts": {
+    "start": "node index.js"
+  },
   "dependencies": {
+    "async": "^2.1.4",
+    "cheerio": "^0.22.0",
     "ejs": "^2.5.5",
     "express": "^4.14.0",
     "flockos": "^0.0.4",
+    "moment": "^2.17.1",
     "mysql": "^2.12.0"
   },
   "devDependencies": {}

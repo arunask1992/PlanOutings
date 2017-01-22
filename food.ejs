@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title></title>
+
+    <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/bootstrap/3.3.1/css/bootstrap.min.css">
+    <script
+  src="https://code.jquery.com/jquery-3.1.1.min.js"
+  integrity="sha256-hVVnYaiADRTO2PzUGmuLJr8BLUSjGIZsDYGmIJLv2b8="
+  crossorigin="anonymous"></script>
+    <style>
+        body { padding-top:50px; }
+   </style>
+          <script>
+          var city,obj;
+function getLocation() {
+    if (navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition(fetchRestaurants);
+    } else {
+       alert("Geolocation is not supported by this browser.");
+    }
+}
+function fetchRestaurants(position){
+  var latlng='lat='+position.coords.latitude + "&lon="+position.coords.longitude;
+  var xhttp = new XMLHttpRequest();
+  xhttp.onreadystatechange = function() {
+    if (this.readyState == 4 && this.status == 200) {
+      var obj=JSON.parse(this.responseText);
+      console.log(obj);
+      for(var i=0;i<20;i++)
+      {
+        document.getElementById("restaurants").innerHTML += '<img src="'+obj.restaurants[i].restaurant.featured_image+'" height="200px" width="200px"><p>'+obj.restaurants[i].restaurant.name+'</p><p>Average Cost for two: '+obj.restaurants[i].restaurant.average_cost_for_two+'</p>';
+      }
+    }
+  };
+  xhttp.open("GET","https://developers.zomato.com/api/v2.1/search?"+latlng, true);
+  xhttp.setRequestHeader("user-key","d31358aa4ab1239f3f0864a5858297c5");
+  xhttp.send();
+}
+getLocation();
+</script>
+<body>
+  <div id='restaurants'>
+  </div>
+</body>
+</html>
