@@ -1,16 +1,26 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <title></title>
-
-    <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/bootstrap/3.3.1/css/bootstrap.min.css">
-    <script
-  src="https://code.jquery.com/jquery-3.1.1.min.js"
-  integrity="sha256-hVVnYaiADRTO2PzUGmuLJr8BLUSjGIZsDYGmIJLv2b8="
-  crossorigin="anonymous"></script>
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css">
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
+  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js"></script>
     <style>
-        body { padding-top:50px; }
+        body { padding-top:0; }
+        .item {
+          display:table;
+          margin:0 auto;
+        }
+        .carousel-caption{
+          position:relative;
+          left:0;
+          right:0;
+        }
+        .carousel-inner{
+          height:100%;
+        }
    </style>
           <script>
           var city,obj;
@@ -23,6 +33,7 @@ function getLocation() {
     }
 }
 function showPosition(position) {
+  alert('in showposition');
     var x=position.coords.latitude + ","+position.coords.longitude;
     var city;
     var xhttp = new XMLHttpRequest();
@@ -38,49 +49,38 @@ function showPosition(position) {
   xhttp.open("GET", "https://maps.googleapis.com/maps/api/geocode/json?latlng="+x+"&key=AIzaSyA51eCYFSD_7bXVPpgh0fxPTuZNnl0IMDk", true);
   xhttp.send();
 }
-function groupBy(items,propertyName)
-{
-    var result = [];
-    $.each(items, function(index, item) {
-       if ($.inArray(item[propertyName], result)==-1) {
-          result.push(item[propertyName]);
-       }
-    });
-    return result;
-}
-function setButton()
-{
-  $('button').click(function(event){
-    fetchMovies(event.target.id);
-  });
-}
+
 function ImgError(ele)
 {
   ele.src='download.png';
   ele.onerror="";
   return true;
 }
-function fetchMovies(language)
+function fetchMovies()
 {
-  var url='download.png'
-  document.getElementById('selectLanguage').style.display='none';
+  var url='download.png';
+  alert('in fetchMovies');
   for(var i=0;i<obj.length;i++)
   {
-    if(obj[i].language===language && obj[i].status=='Coming soon')
-      $('#nowShowingCarousel .carousel-inner').append('<div class="item"><img src="'+obj[i].img+'" onerror="ImgError(this);"></div><div class="carousel-caption"><a href="'+obj[i].url+'">'+obj[i].title+"</a></div>");
-    else if(obj[i].language===language && obj[i].status==="Now showing")
-      $('#comingSoonCarousel .carousel-inner').append('<div class="item"><img src="'+obj[i].img+'" onerror="ImgError(this);"></div><div class="carousel-caption"><a href="'+obj[i].url+'">'+obj[i].title+"</a></div>");
+
+    if(obj[i].status==='Now showing' && obj[i].language=='English')
+      $('#nowShowing').append('<div class="item"><img src="'+obj[i].img+'" onerror="ImgError(this);" style="display:table;margin:0 auto"><div class="carousel-caption"><a href="'+obj[i].url+'">'+obj[i].title+"</a></div>");
   }
-  $('#nowShowingCarousel>.carousel-inner:first-child').addClass('active');
-  $('#comingSoonCarousel>.carousel-inner:first-child').addClass('active');
-
-
+  $('.item:first').addClass('active');
+ $('.item').wrapAll('<div class="carousel-inner" role="listbox">');
+ $('.carousel-inner').wrapAll('<div class="carousel slide" data-ride="carousel" id="nowShowingCarousel">');
+$('#nowShowingCarousel').append('<a class="left carousel-control" href="#nowShowingCarousel" role="button" data-slide="prev">'+
+      '<span class="glyphicon glyphicon-chevron-left" aria-hidden="true"></span>'+
+      '<span class="sr-only">Previous</span></a>'+
+      '<a class="right carousel-control" href="#nowShowingCarousel" role="button" data-slide="next">'+
+      '<span class="glyphicon glyphicon-chevron-right" aria-hidden="true"></span>'+
+      '<span class="sr-only">Next</span>'+
+    '</a>');
 }
 //fetching movie details for city
 function getContents(city)
 {
-  var url = config.siteAddress
-  console.log(url);
+  alert('in getContents');
   var xhttp=new XMLHttpRequest();
   xhttp.onreadystatechange=function(){
   if(this.readyState==4 && this.status ==200){
@@ -90,70 +90,30 @@ function getContents(city)
       if(this.readyState==4 && this.status==200){
         obj=JSON.parse(this.responseText);
         console.log(obj);
-
-var languages = groupBy(obj, 'language');
-$.each( languages, function( index, value ){
-    document.getElementById('selectLanguage').innerHTML+="<button id='"+value+"'>"+value+"</button>";
-});
- setButton();
+        fetchMovies();
       }
     }
-    xhttp2.open("post",url + '/scapeImage',true);
+
+    xhttp2.open("post","https://43e2e9da.ngrok.io/scrapeImage",true);
     xhttp2.setRequestHeader("Content-type", "application/json");
     xhttp2.send(JSON.stringify(data));
 
   }
   };
-  xhttp.open("GET", url + '/scrape?city='+city, true);
+  xhttp.open("GET", "https://43e2e9da.ngrok.io/scrape?city="+city, true);
   xhttp.send();
 }
+$(document).ready(function(){
+  $('.carousel').carousel();
+  getLocation();
+})
 
-getLocation();
 </script>
 </head>
 <body>
-
-  <h2>List of movies</h2>
-  <div id='selectLanguage'>
-  <h3>Select a language</h3>
-  </div>
   <div id='nowShowing'>
-     <div id="nowShowingCarousel" class="carousel slide" data-ride="carousel">
-    <!-- Wrapper for slides -->
-    <div class="carousel-inner" role="listbox">
 
-    </div>
-[
-    <!-- Left and right controls -->
-    <a class="left carousel-control" href="#nowShowingCarousel" role="button" data-slide="prev">
-      <span class="glyphicon glyphicon-chevron-left" aria-hidden="true"></span>
-      <span class="sr-only">Previous</span>
-    </a>
-    <a class="right carousel-control" href="#nowShowingCarousel" role="button" data-slide="next">
-      <span class="glyphicon glyphicon-chevron-right" aria-hidden="true"></span>
-      <span class="sr-only">Next</span>
-    </a>
-  </div>
   <hr>
   </div>
-  <div id='comingSoon'>
-  <div id="comingSoonCarousel" class="carousel slide" data-ride="carousel">
-    <!-- Wrapper for slides -->
-    <div class="carousel-inner" role="listbox">
 
-    </div>
-
-    <!-- Left and right controls -->
-    <a class="left carousel-control" href="#comingSoonCarousel" role="button" data-slide="prev">
-      <span class="glyphicon glyphicon-chevron-left" aria-hidden="true"></span>
-      <span class="sr-only">Previous</span>
-    </a>
-    <a class="right carousel-control" href="#comingSoonCarousel" role="button" data-slide="next">
-      <span class="glyphicon glyphicon-chevron-right" aria-hidden="true"></span>
-      <span class="sr-only">Next</span>
-    </a>
-  </div>
-  <br>
-
-</div>
 </body>

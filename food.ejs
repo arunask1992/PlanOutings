@@ -13,37 +13,129 @@
         body { padding-top:50px; }
    </style>
           <script>
-          var city,obj;
+          var city,obj,page=0,latlng,categories;
 function getLocation() {
     if (navigator.geolocation) {
-        navigator.geolocation.getCurrentPosition(fetchRestaurants);
+        navigator.geolocation.getCurrentPosition(setPosition);
     } else {
        alert("Geolocation is not supported by this browser.");
     }
 }
-function fetchRestaurants(position){
-  position = {coords: {latitude: 12.9760, longitude: 80.2212}}
-  var latlng='lat='+position.coords.latitude + "&lon="+position.coords.longitude;
 
+function setPosition(position)
+{
+  latlng='lat='+position.coords.latitude + "&lon="+position.coords.longitude;
+  getCategories();
+  viewPage();
+}
+
+function displayList()
+{
+  document.getElementById('restaurants').innerHTML="";
+  for(var i=0;i<obj.restaurants.length;i++)
+  {
+        document.getElementById("restaurants").innerHTML += '<img src="'+obj.restaurants[i].restaurant.featured_image+'" height="200px" width="200px"><a target="_blank" href="'+obj.restaurants[i].restaurant.url+'">'+obj.restaurants[i].restaurant.name+'</a><p>Average Cost for two: '+obj.restaurants[i].restaurant.average_cost_for_two+'</p><p>Location:'+obj.restaurants[i].restaurant.location.address+'</p>';
+  }
+
+
+}
+function changePage(context)
+{
+  if(context=='next')
+    page++
+  else
+    page--;
+}
+function getCategories()
+{
+  document.getElementById('categories').innerHTML="Select a category to refine your search";
+   var xhttp = new XMLHttpRequest();
+  xhttp.onreadystatechange = function() {
+    if (this.readyState == 4 && this.status == 200) {
+      categories=JSON.parse(this.responseText);
+      for(var i=0;i<categories.categories.length;i++)
+      document.getElementById('categories').innerHTML+='<button id="category'+categories.categories[i].categories.id+'">'+categories.categories[i].categories.name+'</button>'
+    $('[id^="category"]').click(function(){
+      var id=this.id;
+      var lastChar = id.replace('category','');
+      viewPage(page,lastChar);
+    });
+     }
+  };
+  xhttp.open("GET","https://developers.zomato.com/api/v2.1/categories", true);
+  xhttp.setRequestHeader("user-key","d31358aa4ab1239f3f0864a5858297c5");
+  xhttp.send();
+}
+function viewPage(page,category)
+{
+  var url="";
+  if(page==='undefined')
+   {
+    page=0;
+    }
+  if(page>=5)
+   {
+    document.getElementById('restaurants').innerHTML+='<h3>End of search results</h3>';
+    $('#restaurants-buttons').remove();
+  }
+ else
+  {
+    if(category==='undefined')
+      url="https://developers.zomato.com/api/v2.1/search?"+latlng+"&start="+page*20;
+    else
+      url="https://developers.zomato.com/api/v2.1/search?"+latlng+"&start="+page*20+"&category="+category;
   var xhttp = new XMLHttpRequest();
   xhttp.onreadystatechange = function() {
     if (this.readyState == 4 && this.status == 200) {
-      var obj=JSON.parse(this.responseText);
+      obj=JSON.parse(this.responseText);
       console.log(obj);
-      for(var i=0;i<20;i++)
-      {
-        document.getElementById("restaurants").innerHTML += '<img src="'+obj.restaurants[i].restaurant.featured_image+'" height="200px" width="200px"><p>'+obj.restaurants[i].restaurant.name+'</p><p>Average Cost for two: '+obj.restaurants[i].restaurant.average_cost_for_two+'</p>';
-      }
+      displayList();
+
     }
   };
-  xhttp.open("GET","https://developers.zomato.com/api/v2.1/search?"+latlng, true);
+  xhttp.open("GET",url, true);
   xhttp.setRequestHeader("user-key","d31358aa4ab1239f3f0864a5858297c5");
   xhttp.send();
+}
+}
+function findRestaurant()
+{
+  var url='';
+  if(document.getElementById('query').value==="")
+    return true;
+  else
+  {
+    url="https://developers.zomato.com/api/v2.1/search?q="+document.getElementById('query').value;
+    var xhttp = new XMLHttpRequest();
+  xhttp.onreadystatechange = function() {
+    if (this.readyState == 4 && this.status == 200) {
+      obj=JSON.parse(this.responseText);
+      console.log(obj);
+      displayList();
+
+    }
+  };
+  xhttp.open("GET",url, true);
+  xhttp.setRequestHeader("user-key","d31358aa4ab1239f3f0864a5858297c5");
+  xhttp.send();
+  }
 }
 getLocation();
 </script>
 <body>
+  <div id='search'>
+    <input type='text' id='query' placeholder='Search for a restaurant'><button onClick='findRestaurant();'>Search</button>
+    <button onClick
+  </div>
+  <div id='search-result'>
+  </div>
+  <div id='categories'>
+  </div>
   <div id='restaurants'>
+  </div>
+  <div id='restaurants-buttons'>
+    <button id='next' onClick='changePage("next");viewPage('+page+');'>Next</button>
+    <button id='previous' onClick='changePage("previous");viewPage'>Previous</button>
   </div>
 </body>
 </html>
