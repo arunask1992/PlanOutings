@@ -172,7 +172,7 @@ function sendReminderForNonAdhocOutings() {
                             console.log('Posted'); // Print the shortened url.
                         }
                     });
-                } else if (moment().diff(moment(rows[i].lastReceivedMessageTime), 'minutes') >= 30) {
+                } else if (moment().diff(moment(rows[i].lastReceivedMessageTime), 'minutes') >= 1) {
                     var options = {
                         uri: config.incomingHookUrl,
                         method: 'POST',
@@ -193,7 +193,7 @@ function sendReminderForNonAdhocOutings() {
     });
 }
 sendReminderForNonAdhocOutings();
-var remindOuting = cron.scheduleJob("*/10 * * * *", function () {
+var remindOuting = cron.scheduleJob("*/1 * * * *", function () {
     sendReminderForNonAdhocOutings();
 });
 

@@ -282,12 +282,12 @@ if(!isEmptyObject(rows)){ %>
   </button><br>
     <b><p style='float:left'>Event Type:</b> <%= rows[key][0].event_type %></p>
   <% if(rows[key][0].createdBy===userId) {%>
-  <p style='float:right'>Created By You</p>
+ <br/> <p style='float:right'>Created By You</p>
   <% } else{ %>
-  <p style='float:right'>Created By <%=rows[key][0].createdBy_name %></p>
+  <p style=''>Created By <%=rows[key][0].createdBy_name %></p>
   <% } %>
-   <b><p style='float:left'>Scheduled </b><%= moment(rows[key][0].time).fromNow() %></p>
-  <b><p style='clear:both;'>Venue:</b> <%= rows[key][0].location %></p>
+   <br/><b><p style='float:left'>      Scheduled </b><%= moment(rows[key][0].time).fromNow() %></p>
+  <br/><b><p style='clear:both;'>Venue:</b> <%= rows[key][0].location %></p>
   <b><p>Participants:</b>
   <% for(var j=0;j<rows[key].length;j++){ %>
   <% if(rows[key][j].participant_name==null){ %>No participants</p><% break;} %><%= rows[key][j].participant_name %>

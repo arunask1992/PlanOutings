@@ -7,5 +7,6 @@ module.exports = {
     mysqlDatabase: 'outings',
     siteAddress: 'https://bacccc68.ngrok.io',
     incomingHookUrl: 'https://api.flock.co/hooks/sendMessage/a531b436-484a-4e11-8d3a-d4db812cb193',
-    zomatoToken:'fac8c589db81636bef4c851c66848745'
+    zomatoToken:'fac8c589db81636bef4c851c66848745',
+    botToken: 'ae998847-1930-4992-a934-50cc45b10777'
 };
