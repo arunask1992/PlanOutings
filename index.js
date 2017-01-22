@@ -35,6 +35,15 @@ con.connect(function (err) {
 });
 
 var outingTypes;
+var configuration;
+function loadConfiguration(groupId){
+    con.query('SELECT * from configuration WHERE groupId=?',[groupId], function (err, response) {
+        if (err) throw err;
+        else if(response.length > 0){
+            configuration = response[0];
+        }
+    });
+}
 con.query('SELECT * from outingFrequency', function (err, response) {
     if (err) throw err;
     else {
@@ -106,7 +115,7 @@ app.post('/callback', function (req, res) {
     var token = req.get('x-flock-validation-token') || req.query.token;
     var currentTimeStamp = require('moment')().format('YYYY-MM-DD HH:mm:ss');
     const FIRST_TIME_INSTALL_MESSAGE = 'Looks like you have installed teamBonding for first time, you can create a new outing by clicking on the side bar. Cheers!!'
-
+    loadConfiguration(req.body.to);
     con.query('SELECT * from groupActivities WHERE groupId=?', req.body.to, function (err, response) {
         if (err) throw err;
         else {
@@ -117,7 +126,7 @@ app.post('/callback', function (req, res) {
                         throw err;
                     } else {
                         var options = {
-                            uri: config.incomingHookUrl,
+                            uri: configuration['incomingHookUrl'],
                             method: 'POST',
                             json: {
                                 "text": FIRST_TIME_INSTALL_MESSAGE,

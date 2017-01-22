@@ -1,11 +1,11 @@
 module.exports = {
-    appId: 'c087115b-10cd-4d9a-aeb6-dafc9771da1c',
-    appSecret: '9910bc06-654e-44a6-9db6-a79e7f5967f1',
-    mysqlHost: 'us-cdbr-iron-east-04.cleardb.net',
-    mysqlUser: 'b8a2188e8da361',
-    mysqlPassword: '6431c59a',
-    mysqlDatabase: 'heroku_4c50d801e376d90',
-    siteAddress: 'https://e1c548e7.ngrok.io',
+    appId: 'cc3b7e96-e058-4b30-9dc9-c4b5653cf8d3',
+    appSecret: '583c7f17-ea22-450b-9d08-ee2a9bc7ef93',
+    mysqlHost: 'localhost',
+    mysqlUser: 'root',
+    mysqlPassword: '',
+    mysqlDatabase: 'outings',
+    siteAddress: 'http://43e2e9da.ngrok.io',
     incomingHookUrl: 'https://api.flock.co/hooks/sendMessage/a531b436-484a-4e11-8d3a-d4db812cb193',
     zomatoToken:'fac8c589db81636bef4c851c66848745'
 };
