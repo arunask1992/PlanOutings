@@ -50,7 +50,6 @@ function setPosition(position)
 {
 	console.log('in setPosition');
   latlng='lat='+position.coords.latitude + "&lon="+position.coords.longitude;
-alert(latlng);
   restaurantsNearMe(latlng);
 }
 
@@ -127,7 +126,6 @@ function getSuggestions()
 
 function getId(value){
 	var property='',key='',val='',index='';
-	alert(value);
 	if(suggestions.hasOwnProperty('categories'))
 	{
 		key='categories';
@@ -158,7 +156,6 @@ function FilteredSearch()
 {
 	var lat=12.975296;
 	var lng=80.2198833;
-	alert('in search');
 	var value=document.getElementById('query').value;
 	value=getId(value);
 	if(constraint==='Category')

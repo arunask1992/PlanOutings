@@ -33,7 +33,6 @@ function getLocation() {
     }
 }
 function showPosition(position) {
-  alert('in showposition');
     var x=position.coords.latitude + ","+position.coords.longitude;
     var city;
     var xhttp = new XMLHttpRequest();
@@ -62,7 +61,6 @@ function fetchMovies()
     <% movies = JSON.parse(movies) %>
     <% console.log(movies) %>
   var url='download.png';
-  alert('in fetchMovies');
   for(var i=0;i<movies.length;i++)
   {
 
@@ -84,8 +82,6 @@ $('#nowShowingCarousel').append('<a class="left carousel-control" href="#nowShow
 
 $(document).ready(function(){
   $('.carousel').carousel();
- // alert("hi");
- // getLocation();
 })
 
 </script>
