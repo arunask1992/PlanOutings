@@ -141,7 +141,6 @@ function sendReminderForNonAdhocOutings() {
     var date = new Date();
     const LONG_SINCE_LAST_OUTING_MESSAGE = 'Its very long since you had your last outing, check out what you can try this time';
     const OUTING_COMPLETE_MESSAGE = 'Well the outing went good, but uploading pics in this group helps me keep it safe for future memories.. not just memories you can use me to keep track of bills too';
-    var event_id, participant_id, location, createdBy, venue_id, createdBy_name;
     con.query('Select * from groupActivities', function (err, rows) {
         if (err) throw err;
         if (rows.length > 0) {
@@ -178,24 +177,49 @@ function sendReminderForNonAdhocOutings() {
                             console.log('Posted'); // Print the shortened url.
                         }
                     });
-                } else if (moment().diff(moment(rows[i].lastReceivedMessageTime), 'minutes') >= 1) {
-                    var options = {
-                        uri: config.incomingHookUrl,
-                        method: 'POST',
-                        json: {
-                            "text": OUTING_COMPLETE_MESSAGE,
-                        }
-                    };
-
-
-                    request(options, function (error, response, body) {
-                        if (!error && response.statusCode == 200) {
-                            console.log('Posted complete message'); // Print the shortened url.
-                        }
-                    });
                 }
+                // else if (moment().diff(moment(rows[i].lastReceivedMessageTime), 'minutes') >= 1) {
+                //     var options = {
+                //         uri: config.incomingHookUrl,
+                //         method: 'POST',
+                //         json: {
+                //             "text": OUTING_COMPLETE_MESSAGE,
+                //         }
+                //     };
+                //
+                //
+                //     request(options, function (error, response, body) {
+                //         if (!error && response.statusCode == 200) {
+                //             console.log('Posted complete message'); // Print the shortened url.
+                //         }
+                //     });
+                // }
             }
         }
+    });
+    con.query('Select * from events where notification_sent=false',[],function(err,rows){
+        for(var i=0; i<rows.length; i++){
+            if (moment().diff(moment(rows[i].lastReceivedMessageTime), 'days') >= 1) {
+                var options = {
+                    uri: config.incomingHookUrl,
+                    method: 'POST',
+                    json: {
+                        "text": OUTING_COMPLETE_MESSAGE,
+                    }
+                };
+                con.query('update events set notification_sent=true where event_id=?',[rows[i].event_id], function(err,res){
+                    if(err) throw err;
+                });
+
+
+                request(options, function (error, response, body) {
+                    if (!error && response.statusCode == 200) {
+                        console.log('Posted complete message'); // Print the shortened url.
+                    }
+                });
+            }
+        }
+
     });
 }
 sendReminderForNonAdhocOutings();
@@ -247,7 +271,8 @@ app.post('/callback', function (req, res) {
     var token = req.get('x-flock-validation-token') || req.query.token;
     var currentTimeStamp = require('moment')().format('YYYY-MM-DD HH:mm:ss');
     const FIRST_TIME_INSTALL_MESSAGE = 'Looks like you have installed teamBonding for first time, you can create a new outing by clicking on the side bar. Cheers!!'
-    loadConfiguration(req.body.to);
+    console.log(req.body);
+    configuration = loadConfiguration(req.body.to);
     con.query('SELECT * from groupActivities WHERE groupId=?', req.body.to, function (err, response) {
         if (err) throw err;
         else {
@@ -462,22 +487,7 @@ app.post('/scrapeImage', function (req, res) {
         res.send(movies);
     });
 });
-app.get('/addTask',function(req,res){
-    var userTask = { userId: req.query.userId, task: req.query.task, dueOn: req.query.date };
 
-    con.query('INSERT INTO todo SET ?', userTask, function(err,response){
-        if(err) throw err;
-        else
-        {
-            con.query('SELECT * FROM todo where userId=?',[userTask.userId],function(err,rows){
-                checkDay();
-                jrows=JSON.stringify(rows);
-                res.render(path.join(__dirname + '/todo'),{userId:userTask.userId,rows:jrows});
-            });
-
-        }
-    });
-});
 // viewed at http://localhost:8080
 app.get('/',function(req, res) {
     var token = req.get('x-flock-event-token') || req.query.flockEventToken;
@@ -660,7 +670,7 @@ app.post('/addEvent',function(req,res){
     var userId=req.body.userId;
     var participant,token;
     var username=req.body.username;
-    var events={event_type:event_type,location:location,venue_id:venue_id,createdBy:userId,time:date,createdBy_name:username}
+    var events={event_type:event_type,location:location,venue_id:venue_id,createdBy:userId,time:date,createdBy_name:username, notification_sent: false};
     con.query('INSERT into events set ?',events,function(error,response){
         if(!error)
         {
