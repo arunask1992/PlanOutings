@@ -22,6 +22,40 @@ CREATE TABLE expenses(expense_id INT NOT NULL AUTO_INCREMENT PRIMARY KEY, user_i
 CREATE TABLE expense_participants(id INT NOT NULL AUTO_INCREMENT PRIMARY KEY,expense_id INT, participant_id VARCHAR(100), amount VARCHAR(100), settle_to varchar(200), settled BOOLEAN);
 ALTER TABLE expense_participants add column settling_to_user_id varchar(200);
 
+[26/01/2017 2:07 PM] Nandhini S: __________________________________________________________________
+
+[26/01/2017 2:07 PM] Nandhini S: CREATE TABLE `discussions` (
+  `discussion_id` int(11) NOT NULL AUTO_INCREMENT,
+  `discussion_name` varchar(100) DEFAULT NULL,
+  `createdBy_name` varchar(100) DEFAULT NULL,
+  `createdBy` varchar(50) DEFAULT NULL,
+  PRIMARY KEY (`discussion_id`)
+);
+CREATE TABLE `discussion_participants` (
+  `discussion_id` int(11) DEFAULT NULL,
+  `participant_id` varchar(50) DEFAULT NULL,
+  `participant_name` varchar(100) DEFAULT NULL,
+  KEY `discussion_id` (`discussion_id`),
+  CONSTRAINT `discussion_participants_ibfk_1` FOREIGN KEY (`discussion_id`) REFERENCES `discussions` (`discussion_id`),
+  CONSTRAINT `discussion_participants_ibfk_2` FOREIGN KEY (`discussion_id`) REFERENCES `discussions` (`discussion_id`) ON DELETE CASCADE ON UPDATE CASCADE
+);
+CREATE TABLE `comments` (
+  `discussion_id` int(11) DEFAULT NULL,
+  `comment` text,
+  `timestamp` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  `comment_id` int(11) NOT NULL AUTO_INCREMENT,
+  `givenBy` varchar(50) DEFAULT NULL,
+  `upvotes` int(11) DEFAULT '0',
+  `parent` int(11) DEFAULT '-1',
+  PRIMARY KEY (`comment_id`),
+  KEY `discussion_id` (`discussion_id`),
+  CONSTRAINT `comments_ibfk_1` FOREIGN KEY (`discussion_id`) REFERENCES `discussions` (`discussion_id`),
+  CONSTRAINT `comments_ibfk_2` FOREIGN KEY (`discussion_id`) REFERENCES `discussions` (`discussion_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `comments_ibfk_3` FOREIGN KEY (`discussion_id`) REFERENCES `discussions` (`discussion_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `comments_ibfk_4` FOREIGN KEY (`discussion_id`) REFERENCES `discussions` (`discussion_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `comments_ibfk_5` FOREIGN KEY (`discussion_id`) REFERENCES `discussions` (`discussion_id`) ON DELETE CASCADE
+);
+
 
 
 
