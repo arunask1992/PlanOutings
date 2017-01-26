@@ -149,7 +149,9 @@
 });
       $('[id^="upvote"]').click(function(){
         var id=event.target.id
+
         id=id.substr(id.indexOf('-')+1,id.length-1);
+        alert(id);
         upvote(id);
       });
       $('[id^="rowbutton"]').click(function(){
@@ -327,6 +329,10 @@
       else
         $('#newEvent').html("Create new Event <span class='glyphicon glyphicon-menu-down' style='flot:right'></span>");
      }
+     function showExpenses()
+     {
+        $("#expenses").toggle();
+     }
      function deleteEvent(id)
      {
       var url="";
@@ -474,6 +480,10 @@ if(!isEmptyObject(rows)){ %>
     <i class="fa fa-film" aria-hidden="true"></i> Movies
 </button>
 <br/>
+<br/>
+<button type='button' id='manageExpenses' onClick="flock.openWidget('https://6db78e82.ngrok.io/manageExpenses', 'modal', 'modal')" class='btn-default btn-block'>Manage Expenses <span class='glyphicon glyphicon-menu-down'></span></button>
+<br/>
+<br/>
 <div id='addDiscussion' style='display:none'>
 
     <div class='form-group'>
@@ -508,7 +518,10 @@ for(var i=0;i<latestcomments.length;i++){ %>
   if(latestcomments[i][j].comment_id) {%>
   <div id='comment-<%=latestcomments[i][j].comment_id %>'>
     <p><%- latestcomments[i][j].comment %></p>
-    <button style='float:left' type='button' id='upvote-<%=latestcomments[i][j].comment_id %>'>Upvote</button>
+    <button style='float:left' type='button' id='upvote-<%=latestcomments[i][j].comment_id %>'><i class="fa fa-thumbs-up"></i></button>
+<% if(latestcomments[i][j].upvotes) {%>
+    <p style='float:right'><%= latestcomments[i][j].upvotes %>  upvotes</p>
+    <% } %>
     <hr style='clear:both'>
   </div>
 

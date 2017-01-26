@@ -1,0 +1,302 @@
+<html>
+<head>
+ <link type='text/css' href='https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css' rel='stylesheet'>
+    <link type='text/css' href='https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css' rel='stylesheet'>
+        <script src="https://code.jquery.com/jquery-1.9.1.js"></script>
+    <script src="https://code.jquery.com/ui/1.10.3/jquery-ui.js"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.4.8/angular.min.js"></script>
+<style>
+
+        #suggest {
+            z-index: 999;
+            display:none;
+            background: #fff;
+            padding: 10px;
+            border: 1px solid #969696;
+            cursor: pointer;
+            border-top:none;
+        }
+        .ui-autocomplete{
+            position:relative;
+            top:0;
+            left:0;
+            width:406px;
+            border-radius:0;
+            -moz-border-radius:0;
+            border-top:none;
+            border-color:#969696;
+        }
+
+                button{
+                  border-radius:5px;
+                }
+                #Suggestion_event,#Suggestion_discussion{
+                  margin:0;
+                  position: relative;
+                  top:-15px;
+                  cursor:pointer;
+                }
+                #Suggestion_event:hover,#Suggestion_discussion:hover{
+                  background-color: #e2dede;
+                }
+
+                [id^='venue']:hover{
+                  background-color: #e2dede;
+                }
+                [id^='venue']{
+                  cursor:pointer;
+                }
+                [id^='rowbutton ']{
+                  background-color:Transparent;
+            background-repeat:no-repeat;
+            border: none;
+            cursor:pointer;
+            overflow: hidden;
+            outline:none;
+                }
+                [id^='row ']{
+                  cursor:pointer;
+                  border-radius:2px;
+                  width:100%;
+                }
+                [id^='row ']:hover{
+                  background-color: #e2dede;
+                }
+                #suggest li{
+                  list-style-type:none;
+                }
+                time.icon
+        {
+          float:left;
+          font-size: 1em; /* change icon size */
+          display: block;
+          position: relative;
+          width: 4em;
+          height:4em;
+          background-color: #fff;
+          border-radius: 0.6em;
+          box-shadow: 0 1px 0 #bdbdbd, 0 2px 0 #fff, 0 3px 0 #bdbdbd, 0 4px 0 #fff, 0 5px 0 #bdbdbd, 0 0 0 1px #bdbdbd;
+          overflow: hidden;
+        }
+        time.icon *
+        {
+          display: block;
+          width: 100%;
+          font-size: 1em;
+          font-weight: bold;
+          font-style: normal;
+          text-align: center;
+        }
+        time.icon strong
+        {
+
+          position: absolute;
+            top: 0;
+            padding: 0;
+            color: #fff;
+            background-color: #fd9f1b;
+            border-bottom: 1px dashed #f37302;
+            box-shadow: 0 2px 0 #fd9f1b;
+        }
+        time.icon em
+        {
+              position: absolute;
+            bottom: 0;
+            color: #fd9f1b;
+            font-size: 0.8em;
+        }
+        time.icon span
+        {
+          font-size: 1.4em;
+            letter-spacing: 0em;
+            padding-top: 1em;
+            color: #2f2f2f;
+        }
+        #upComingEvents{
+          margin:0;
+        }
+        #showEvents,#newEvent,#newDiscussion{
+          float:left;padding-top:10px;padding-bottom:10px;padding-left:25px;padding-right:25px;margin-top:30px;
+        }
+        #showEvents span{
+          float:right;
+        }
+        #newEvent span{
+          float:right;
+        }
+        #newDiscussion span{
+          float:right;
+        }
+        </style>
+</head>
+<script>
+var obj, settlingExpense;
+function getContacts()
+   {
+    var userId= document.getElementById('userId').value;
+      var xhttp = new XMLHttpRequest();
+      xhttp.onreadystatechange = function() {
+      if (this.readyState == 4 && this.status == 200) {
+        if(obj==='Not a user'){
+          $('#addEvent').remove();
+          $('#newEvent').remove();
+        }
+      obj=JSON.parse(this.responseText);
+      console.log(obj);
+    }
+  };
+  xhttp.open("GET", "https://6db78e82.ngrok.io/getContacts?userId="+userId, true);
+  xhttp.send();
+  }
+
+  function settleExpense(expense){
+    console.log('........');
+    console.log(expense);
+    expense = JSON.parse(expense);
+    var data = new FormData();
+    data.append('expenseId', expense.expense_id);
+    data.append('userId', expense.participant_id);
+    data.append('userName', userName);
+    data.append('settlingTo', expense.settle_to);
+    data.append('settlingToUserId', expense.settling_to_user_id);
+    data.append('settlingAmount', expense.amount);
+    var xhttp = new XMLHttpRequest();
+          xhttp.onreadystatechange = function() {
+          if (this.readyState == 4 && this.status == 200) {
+            obj=JSON.parse(this.responseText);
+            console.log(obj);
+        }
+      };
+      xhttp.open("POST", "https://6db78e82.ngrok.io/settleExpense", true);
+      xhttp.send(data);
+      }
+
+function showForm()
+    {
+      $('#newExpense').toggle();
+      if(document.getElementById('createExpense').style.display=='block')
+        $('#createExpense').html("Create new Event <span class='glyphicon glyphicon-menu-up' style='flot:right'></span>");
+      else
+        $('#createExpense').html("Create new Event <span class='glyphicon glyphicon-menu-down' style='flot:right'></span>");
+    }
+
+function loadUserSuggestions(id,suggestion)
+    {
+      console.log(id);
+      id=id+'';
+      suggestion=suggestion+'';
+      console.log(suggestion);
+      document.getElementById(suggestion).innerHTML="";
+      var q=document.getElementById(id).value;
+      if(q.length>1)
+      {
+      q=q.substr(q.lastIndexOf(',')+1).toUpperCase();
+      for(var i=0;i<obj.length;i++)
+      {
+        var temp=obj[i].firstName.toUpperCase();
+    if(temp.indexOf(q)===0)
+
+      document.getElementById(suggestion).innerHTML+='<li id="suggestion" class="suggest" style="list-style-type:none;">'+obj[i].firstName+'</button>';
+      }
+      $('.suggest').click(function(){
+        var str=document.getElementById(id).value;
+        str = str.substr(0, str.lastIndexOf(","));
+        if(str!="")
+        document.getElementById(id).value=str+','+this.innerHTML+',';
+      else
+        document.getElementById(id).value=this.innerHTML+','
+      document.getElementById(suggestion).innerHTML="";
+      });
+    }
+    }
+    function getPartcipantId(idInput,idValue)
+    {
+      console.log('in participants_id');
+      idInput=idInput+'';
+      idValue=idValue+'';
+      var participants=document.getElementById(idInput).value.split(',');
+      var participants_id="";
+      var participant,participants_array=[];
+      for(var i=0;i<participants.length-1;i++)
+      {
+        var object=obj.filter(function ( object ) {
+        return object.firstName === participants[i];
+})[0];
+        participants_id+=object.id+',';
+        participant={participant_id:object.id,participant_name:object.firstName};
+        participants_array.push(participant);
+        if(object.id===undefined)
+          return false;
+      }
+      var participants=JSON.stringify(participants_array);
+      document.getElementById('participants_id').value=participants;
+    }
+
+</script>
+<body onload="getContacts();">
+<div class="container">
+<button id='createExpense' type='button' style='float:right;margin-top:10px;margin-right:5px;margin-bottom:8px' onClick='showForm();' class='btn-default btn-block'><i class="fa fa-rupee" >   Create new expense </i> <span class='glyphicon glyphicon-menu-down'></span></button><hr style='clear:both'></div>
+<div id='newExpense' style='display:none'>
+<form action='https://6db78e82.ngrok.io/addExpense' method="POST">
+  <div class="form-group">
+    <label for="expenseName">Expense Name</label>
+    <input type="text" class="form-control" id="expenseName" name="expenseName">
+  </div>
+  <div class="form-group">
+      <label for="expenseAmount">Expense Amount</label>
+      <input type="text" class="form-control" id="expenseAmount" name="expenseAmount">
+   </div>
+   <div class='form-group'>
+       <label for='participants'>People involved:</label>
+       <input name='participants' id='participants' class='form-control' type='text' onkeydown='loadUserSuggestions("participants","Suggestion_event")' autocomplete='off' required/>
+     </div>
+        <div id='Suggestion_event'></div>
+         <input type='hidden' name='userId' id='userId' value= <%= userId %> >
+            <input type='hidden' name='username' value= <%= username %> >
+            <input type='hidden' name='participants_id' id='participants_id'>
+            <button type='submit' onClick='getPartcipantId("participants","participants_id");' class='btn-default btn-block'>Add Expense</button>
+</form>
+</div>
+  <% expenses = JSON.parse(expenses) %>
+<% if(expenses.length === 0) { %>
+<div class="alert alert-success" role="alert">
+  All expenses settled
+</div>
+<% } else {%>
+<table class="table table-striped">
+  <thead>
+    <tr>
+      <th>Expense Name</th>
+      <th>Settle To</th>
+      <th>Amount</th>
+      <th>Settle</th>
+    </tr>
+  </thead>
+  <tbody>
+  <% for(var i=0; i<expenses.length ; i++) { %>
+    <tr>
+      <td><%= expenses[i].name %></td>
+      <td><%= expenses[i].settle_to %></td>
+      <td><%= expenses[i].amount %></td>
+      <td>
+      <form action='https://6db78e82.ngrok.io/settleExpense' method="POST">
+        <input type="hidden" name="expenseId" value=<%= expenses[i].expense_id %>>
+        <input type="hidden" name="userId" value=<%= expenses[i].participant_id %>>
+        <input type="hidden" name="userName" value=<%= expenses[i].userName %>>
+        <input type="hidden" name="settlingTo" value=<%= expenses[i].settle_to %>>
+        <input type="hidden" name="settlingToUserId" value=<%= expenses[i].settling_to_user_id %>>
+        <input type="hidden" name="settlingAmount" value=<%= expenses[i].amount %>>
+      <button class='btn-primary .btn-md' id="settle<%=expenses[i].expense_id %>"> Mark Settled</button></form>
+      </td>
+    </tr>
+    <% } %>
+  </tbody>
+</table>
+
+<% } %>
+</div>
+
+
+</body>
+
+</html>

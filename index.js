@@ -743,6 +743,91 @@ app.post('/addEvent', function (req, res) {
         }
     });
 });
+
+app.post('/addExpense', function (req, res) {
+    var username = '';
+    var event_type = req.body.eventType;
+    var participants = JSON.parse(req.body.participants_id);
+    var date = req.body.date;
+    var userId = req.body.userId;
+    var expenseName = req.body.expenseName;
+    var expenseAmount = req.body.expenseAmount;
+    var participant, token;
+    var username = req.body.username;
+    var expense = {
+        user_id: userId,
+        user_name: username,
+        name: expenseName,
+        expense_amount: expenseAmount,
+        date: moment().format('YYYY-MM-DD HH:mm:ss')
+    };
+    con.query('INSERT into expenses set ?', expense, function (error, response) {
+        if (!error) {
+            console.log('Expense added');
+            var expense_id = response.insertId;
+            var individualAmount = expenseAmount/(participants.length + 1);
+            participants = participants.map(function (val) {
+                participant = {
+                    expense_id: expense_id,
+                    participant_id: val.participant_id,
+                    amount: individualAmount,
+                    settle_to: username,
+                    settling_to_user_id: userId,
+                    settled: false
+                };
+                con.query('SELECT token from tokens where uid=?', userId, function (err, res1) {
+                    if (!err) {
+                        token = res1['0'].token;
+                        console.log(token);
+                    }
+                });
+                con.query('INSERT into expense_participants set ?', participant, function (error, response) {
+                    if (!error) {
+                        date = moment(date).format("dddd, MMM YYYY, h:mm:ss a");
+                        flock.callMethod('chat.sendMessage', config.botToken,
+                            {
+                                to: val.participant_id,
+                                //text: 'You have been invited for '+event_type+' at '+location+' by '+username,
+                                attachments: [{
+                                    title: "Invitation",
+                                    description: "",
+                                    views: {
+                                        flockml: '<flockml>A new expense is added and you need to settle' + individualAmount + ' to <user userId="' + userId + '">' + username + '</user> '
+                                    },
+                                    buttons: [{
+                                        name: 'View',
+                                        action: {
+                                            type: 'openWidget',
+                                            desktopType: 'modal',
+                                            mobileType: 'sidebar',
+                                            url: 'https://6db78e82.ngrok.io/manageExpenses'
+                                        },
+                                        id: 'view',
+
+                                    }]
+                                }]
+
+                            }, function (error, response) {
+                                if (!error)
+                                    console.log(response);
+                                else
+                                    console.log(error);
+                            });
+                        con.query('select *  from expense_participants P right join expenses E on P.expense_id=E.expense_id where p.settled=false and P.participant_id=?', [userId],function (err, res1) {
+                            if (!err) {
+                                expenses = JSON.stringify(res1);
+                                res.render(path.join(__dirname + '/expenses'), {userId: userId, username: username, expenses: expenses});
+                            }
+                        })
+                    }
+                    else console.log(error);
+                });
+
+            });
+        }
+    });
+});
+
 app.use(function (req, res, next) {
     res.header("Access-Control-Allow-Origin", "*");
     res.header("Access-Control-Allow-Headers", "X-APP-TOKEN");
@@ -756,16 +841,12 @@ app.get('/upvote', function (req, res) {
     con.query('update comments set upvotes=upvotes+1 where comment_id=?', comment_id, function (error, response) {
         if (error) console.log(error);
         else {
-            var upvote = {comment_id: comment_id, upvoteBy: userId, upvoteBy_name: username};
-            con.query('insert into upvotes set ?', upvote, function (err, response) {
-                if (err) console.log(err);
-                else {
+
                     res.send('done');
                 }
             })
-        }
-    })
-});
+        });
+
 
 app.get('/getDiscussion', function (req, res) {
     var username = JSON.parse(req.query.flockEvent).userName;
@@ -789,7 +870,7 @@ app.post('/addComment', function (req, res) {
     var givenBy = req.body.userId;
     var discussion_id = req.body.discussion_id;
     var comment = req.body.comment || req.body.comment;
-    console.log(comment);
+    console.log('addComment'+givenBy);
     var username = req.body.username;
     var comment = {givenBy: givenBy, discussion_id: discussion_id, comment: comment};
     con.query('insert into comments set ?', comment, function (error, response) {
@@ -799,8 +880,10 @@ app.post('/addComment', function (req, res) {
                 if (!err) {
                     res1 = groupArray(res1, 'event_id');
                     res1 = JSON.stringify(res1);
-                    con.query('select *  from discussion_participants P right join discussions D on P.discussion_id=D.discussion_id where D.createdBy=? or P.participant_id=?', [givenBy, givenBy], function (error, userDiscussions) {
+                    con.query('select D.discussion_id  from discussion_participants P right join discussions D on P.discussion_id=D.discussion_id where D.createdBy=? or P.participant_id=?', [givenBy, givenBy], function (error, userDiscussions) {
                         if (!error) {
+                            userDiscussions=userDiscussions.map(item => item.discussion_id)
+                                .filter((value, index, self) => self.indexOf(value) === index)
                             async.map(userDiscussions, findcomments, function (err, results) {
                                 console.log('inside async');
                                 if (err) console.log(err);
@@ -828,7 +911,8 @@ app.post('/addComment', function (req, res) {
 
 var findcomments=function(val,fn){
     console.log('in find comments');
-    con.query('select comments.comment,comments.comment_id,comments.upvotes,discussions.discussion_id,discussions.discussion_name,upvotes.upvoteBy from comments left join upvotes on comments.comment_id=upvotes.comment_id right join discussions on discussions.discussion_id=comments.discussion_id where discussions.discussion_id=?',val,function(error,results){
+    console.log(val);
+    con.query('select comments.comment,comments.comment_id,comments.upvotes,discussions.discussion_id,discussions.discussion_name from comments right join discussions on discussions.discussion_id=comments.discussion_id where discussions.discussion_id=?',val,function(error,results){
         if(error) console.log(error);
         else
         {
@@ -967,10 +1051,73 @@ app.get('/showSuggestion',function(req,res){
 
     res.render(path.join(__dirname + '/discuss'));
 });
+
+app.get('/manageExpenses', function(req,res){
+    console.log(req.query.flockEvent);
+    var flockEvent = JSON.parse(req.query.flockEvent);
+    var userId = flockEvent.userId;
+    con.query('select *  from expense_participants P right join expenses E on P.expense_id=E.expense_id where P.participant_id=? and settled=false', [userId],function (err, res1) {
+        if (!err) {
+            res.render(path.join(__dirname + '/expenses'), {
+                userId: userId,
+                username: flockEvent.userName,
+                expenses: JSON.stringify(res1)
+            });
+        }});
+});
+
+app.post('/settleExpense', function(req,res){
+    var expenseId = req.body.expenseId;
+    var userId = req.body.userId;
+    var userName = req.body.username;
+    var settlingTo = req.body.settlingTo;
+    var settlingToUserId = req.body.settlingToUserId;
+    var token;
+    var amount = req.body.settlingAmount;
+    con.query('update expense_participants set settled=true where expense_id=?',[expenseId], function(err,res){
+       if(!err){
+           con.query('SELECT token from tokens where uid=?', userId, function (err, res1) {
+               if (!err) {
+                   token = res1['0'].token;
+                   console.log(token);
+               }
+           });
+           flock.callMethod('chat.sendMessage', config.botToken,
+               {
+                   to: settlingToUserId,
+                   //text: 'You have been invited for '+event_type+' at '+location+' by '+username,
+                   attachments: [{
+                       title: "Settlement",
+                       description: "",
+                       views: {
+                           flockml: '<flockml>An amount of' + amount + ' was settled by <user userId="' + userId + '">' + userName + '</user> '
+                       },
+                       buttons: [{
+                           name: 'View',
+                           action: {
+                               type: 'openWidget',
+                               desktopType: 'modal',
+                               mobileType: 'sidebar',
+                               url: 'https://6db78e82.ngrok.io/manageExpenses'
+                           },
+                           id: 'view',
+
+                       }]
+                   }]
+
+               }, function (error, response) {
+                   if (!error)
+                       console.log(response);
+                   else
+                       console.log(error);
+               });
+       }
+    });
+});
 flock.events.on('client.slashCommand',function(event){
     var command=event.command;
     var to=event.chat;
-    var username=event.userName;;
+    var username=event.userName;
     var userId=event.userId;
     var text=event.text;
     console.log(text);
