@@ -1,5 +1,6 @@
 var flock = require('flockos');
-var config = require('./config.js');
+var common = require('./common.js');
+var config = common.config();
 var express = require('express');
 var fs = require('fs');
 var mysql = require("mysql");

@@ -1,6 +1,7 @@
 var exports = module.exports = {};
 var mysql = require("mysql");
-var config = require('./config.js');
+var common = require('./common.js');
+var config = common.config();
 var express = require('express');
 var fs = require('fs');
 var request = require('request');

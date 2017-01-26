@@ -17,7 +17,12 @@ INSERT INTO outingFrequency(displayName, numberOfDays) values('End of month',30)
 INSERT INTO outingFrequency(displayName, numberOfDays) values('Its adhoc, we never know',0);
 CREATE TABLE configuration (id INT NOT NULL AUTO_INCREMENT PRIMARY KEY, groupId VARCHAR(100), outingFrequency VARCHAR(5), userId VARCHAR(100), incomingHookUrl VARCHAR(500));
 CREATE TABLE groupActivities(id INT NOT NULL AUTO_INCREMENT PRIMARY KEY, groupId VARCHAR(100), lastReceivedMessageTime TIMESTAMP);
-CREATE TABLE scrapedMovies (id INT NOT NULL AUTO_INCREMENT PRIMARY KEY, name VARCHAR(200), language VARCHAR(100),url VARCHAR(1000), image_url VARCHAR(100))
+CREATE TABLE scrapedMovies (id INT NOT NULL AUTO_INCREMENT PRIMARY KEY, name VARCHAR(200), language VARCHAR(100),url VARCHAR(1000), image_url VARCHAR(100));
 CREATE TABLE expenses(expense_id INT NOT NULL AUTO_INCREMENT PRIMARY KEY, user_id VARCHAR(100) NOT NULL, user_name VARCHAR(200), name VARCHAR(100), expense_amount float, date timestamp);
 CREATE TABLE expense_participants(id INT NOT NULL AUTO_INCREMENT PRIMARY KEY,expense_id INT, participant_id VARCHAR(100), amount VARCHAR(100), settle_to varchar(200), settled BOOLEAN);
 ALTER TABLE expense_participants add column settling_to_user_id varchar(200);
+
+
+
+
+mysql -u bda54d0019ebf2 -pa8c990fb -h us-cdbr-iron-east-04.cleardb.net heroku_b2639c7fa4fe81c
