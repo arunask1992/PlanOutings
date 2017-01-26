@@ -18,3 +18,5 @@ INSERT INTO outingFrequency(displayName, numberOfDays) values('Its adhoc, we nev
 CREATE TABLE configuration (id INT NOT NULL AUTO_INCREMENT PRIMARY KEY, groupId VARCHAR(100), outingFrequency VARCHAR(5), userId VARCHAR(100), incomingHookUrl VARCHAR(500));
 CREATE TABLE groupActivities(id INT NOT NULL AUTO_INCREMENT PRIMARY KEY, groupId VARCHAR(100), lastReceivedMessageTime TIMESTAMP);
 CREATE TABLE scrapedMovies (id INT NOT NULL AUTO_INCREMENT PRIMARY KEY, name VARCHAR(200), language VARCHAR(100),url VARCHAR(1000), image_url VARCHAR(100))
+CREATE TABLE expenses(id INT NOT NULL AUTO_INCREMENT PRIMARY KEY, event_id INT NOT NULL, name VARCHAR(100));
+CREATE TABLE expense_participant(id INT NOT NULL AUTO_INCREMENT PRIMARY KEY, participant_id VARCHAR(100), participant_name VARCHAR(300), settled BOOLEAN);

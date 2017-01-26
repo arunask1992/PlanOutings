@@ -1,0 +1,120 @@
+#suggest {
+    z-index: 999;
+    display:none;
+    background: #fff;
+    padding: 10px;
+    border: 1px solid #969696;
+    cursor: pointer;
+    border-top:none;
+}
+.ui-autocomplete{
+    position:relative;
+    top:0;
+    left:0;
+    width:406px;
+    border-radius:0;
+    -moz-border-radius:0;
+    border-top:none;
+    border-color:#969696;
+}
+
+button{
+    border-radius:5px;
+}
+#Suggestion_event,#Suggestion_discussion{
+    margin:0;
+    position: relative;
+    top:-15px;
+    cursor:pointer;
+}
+#Suggestion_event:hover,#Suggestion_discussion:hover{
+    background-color: #e2dede;
+}
+
+[id^='venue']:hover{
+    background-color: #e2dede;
+}
+[id^='venue']{
+    cursor:pointer;
+}
+[id^='rowbutton ']{
+    background-color:Transparent;
+    background-repeat:no-repeat;
+    border: none;
+    cursor:pointer;
+    overflow: hidden;
+    outline:none;
+}
+[id^='row ']{
+    cursor:pointer;
+    border-radius:2px;
+    width:100%;
+}
+[id^='row ']:hover{
+    background-color: #e2dede;
+}
+#suggest li{
+    list-style-type:none;
+}
+time.icon
+{
+    float:left;
+    font-size: 1em; /* change icon size */
+    display: block;
+    position: relative;
+    width: 4em;
+    height:4em;
+    background-color: #fff;
+    border-radius: 0.6em;
+    box-shadow: 0 1px 0 #bdbdbd, 0 2px 0 #fff, 0 3px 0 #bdbdbd, 0 4px 0 #fff, 0 5px 0 #bdbdbd, 0 0 0 1px #bdbdbd;
+    overflow: hidden;
+}
+time.icon *
+{
+    display: block;
+    width: 100%;
+    font-size: 1em;
+    font-weight: bold;
+    font-style: normal;
+    text-align: center;
+}
+time.icon strong
+{
+
+    position: absolute;
+    top: 0;
+    padding: 0;
+    color: #fff;
+    background-color: #fd9f1b;
+    border-bottom: 1px dashed #f37302;
+    box-shadow: 0 2px 0 #fd9f1b;
+}
+time.icon em
+{
+    position: absolute;
+    bottom: 0;
+    color: #fd9f1b;
+    font-size: 0.8em;
+}
+time.icon span
+{
+    font-size: 1.4em;
+    letter-spacing: 0em;
+    padding-top: 1em;
+    color: #2f2f2f;
+}
+#upComingEvents{
+    margin:0;
+}
+#showEvents,#newEvent,#newDiscussion{
+    float:left;padding-top:10px;padding-bottom:10px;padding-left:25px;padding-right:25px;margin-top:30px;
+}
+#showEvents span{
+    float:right;
+}
+#newEvent span{
+    float:right;
+}
+#newDiscussion span{
+    float:right;
+}

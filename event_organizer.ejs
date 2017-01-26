@@ -1,6 +1,128 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+    <style>
+        #suggest {
+            z-index: 999;
+            display:none;
+            background: #fff;
+            padding: 10px;
+            border: 1px solid #969696;
+            cursor: pointer;
+            border-top:none;
+        }
+        .ui-autocomplete{
+            position:relative;
+            top:0;
+            left:0;
+            width:406px;
+            border-radius:0;
+            -moz-border-radius:0;
+            border-top:none;
+            border-color:#969696;
+        }
+
+                button{
+                  border-radius:5px;
+                }
+                #Suggestion_event,#Suggestion_discussion{
+                  margin:0;
+                  position: relative;
+                  top:-15px;
+                  cursor:pointer;
+                }
+                #Suggestion_event:hover,#Suggestion_discussion:hover{
+                  background-color: #e2dede;
+                }
+
+                [id^='venue']:hover{
+                  background-color: #e2dede;
+                }
+                [id^='venue']{
+                  cursor:pointer;
+                }
+                [id^='rowbutton ']{
+                  background-color:Transparent;
+            background-repeat:no-repeat;
+            border: none;
+            cursor:pointer;
+            overflow: hidden;
+            outline:none;
+                }
+                [id^='row ']{
+                  cursor:pointer;
+                  border-radius:2px;
+                  width:100%;
+                }
+                [id^='row ']:hover{
+                  background-color: #e2dede;
+                }
+                #suggest li{
+                  list-style-type:none;
+                }
+                time.icon
+        {
+          float:left;
+          font-size: 1em; /* change icon size */
+          display: block;
+          position: relative;
+          width: 4em;
+          height:4em;
+          background-color: #fff;
+          border-radius: 0.6em;
+          box-shadow: 0 1px 0 #bdbdbd, 0 2px 0 #fff, 0 3px 0 #bdbdbd, 0 4px 0 #fff, 0 5px 0 #bdbdbd, 0 0 0 1px #bdbdbd;
+          overflow: hidden;
+        }
+        time.icon *
+        {
+          display: block;
+          width: 100%;
+          font-size: 1em;
+          font-weight: bold;
+          font-style: normal;
+          text-align: center;
+        }
+        time.icon strong
+        {
+
+          position: absolute;
+            top: 0;
+            padding: 0;
+            color: #fff;
+            background-color: #fd9f1b;
+            border-bottom: 1px dashed #f37302;
+            box-shadow: 0 2px 0 #fd9f1b;
+        }
+        time.icon em
+        {
+              position: absolute;
+            bottom: 0;
+            color: #fd9f1b;
+            font-size: 0.8em;
+        }
+        time.icon span
+        {
+          font-size: 1.4em;
+            letter-spacing: 0em;
+            padding-top: 1em;
+            color: #2f2f2f;
+        }
+        #upComingEvents{
+          margin:0;
+        }
+        #showEvents,#newEvent,#newDiscussion{
+          float:left;padding-top:10px;padding-bottom:10px;padding-left:25px;padding-right:25px;margin-top:30px;
+        }
+        #showEvents span{
+          float:right;
+        }
+        #newEvent span{
+          float:right;
+        }
+        #newDiscussion span{
+          float:right;
+        }
+   </style>
     <meta charset="UTF-8">
     <title></title>
     <script src="https://code.jquery.com/jquery-1.9.1.js"></script>
@@ -10,120 +132,87 @@
     <script type='text/javascript' src='https://mugifly.github.io/jquery-simple-datetimepicker/jquery.simple-dtpicker.js'></script>
     <link type="text/css" href="https://mugifly.github.io/jquery-simple-datetimepicker/jquery.simple-dtpicker.css" rel="stylesheet">
     <link type='text/css' href='https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css' rel='stylesheet'>
+    <link type='text/css' href='https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css' rel='stylesheet'>
     <script type='text/javascript' src='https://apps-static.flock.co/js-sdk/0.1.0/flock.js'></script>
-    <style>
-    #suggest {
-    z-index: 999;
-    display:none;
-    background: #fff;
-    padding: 10px;
-    border: 1px solid #969696;
-    cursor: pointer;
-    border-top:none;
-}
-.ui-autocomplete{
-    position:relative;
-    top:0;
-    left:0;
-    width:406px;
-    border-radius:0;
-    -moz-border-radius:0;
-    border-top:none;
-    border-color:#969696;
-}
-
-        button{
-          border-radius:5px;
-        }
-        #participantSuggestion{
-          margin:0;
-          position: relative;
-          top:-15px;
-          cursor:pointer;
-        }
-        #participantSuggestion:hover{
-          background-color: #e2dede;
-        }
-
-        [id^='venue']:hover{
-          background-color: #e2dede;
-        }
-        [id^='venue']{
-          cursor:pointer;
-        }
-        [id^='rowbutton ']{
-          background-color:Transparent;
-    background-repeat:no-repeat;
-    border: none;
-    cursor:pointer;
-    overflow: hidden;
-    outline:none;
-        }
-        [id^='row ']{
-          cursor:pointer;
-          border-radius:2px;
-          width:100%;
-        }
-        [id^='row ']:hover{
-          background-color: #e2dede;
-        }
-        #suggest li{
-          list-style-type:none;
-        }
-        time.icon
-{
-  float:left;
-  font-size: 1em; /* change icon size */
-  display: block;
-  position: relative;
-  width: 4em;
-  height:4em;
-  background-color: #fff;
-  border-radius: 0.6em;
-  box-shadow: 0 1px 0 #bdbdbd, 0 2px 0 #fff, 0 3px 0 #bdbdbd, 0 4px 0 #fff, 0 5px 0 #bdbdbd, 0 0 0 1px #bdbdbd;
-  overflow: hidden;
-}
-time.icon *
-{
-  display: block;
-  width: 100%;
-  font-size: 1em;
-  font-weight: bold;
-  font-style: normal;
-  text-align: center;
-}
-time.icon strong
-{
-
-  position: absolute;
-    top: 0;
-    padding: 0;
-    color: #fff;
-    background-color: #fd9f1b;
-    border-bottom: 1px dashed #f37302;
-    box-shadow: 0 2px 0 #fd9f1b;
-}
-time.icon em
-{
-      position: absolute;
-    bottom: 0;
-    color: #fd9f1b;
-    font-size: 0.8em;
-}
-time.icon span
-{
-  font-size: 1.4em;
-    letter-spacing: 0em;
-    padding-top: 1em;
-    color: #2f2f2f;
-}
-#upComingEvents{
-  margin:0;
-}
-   </style>
    <script>
 
    var obj,oData;
+      $(document).ready(function(){
+      $('#date').appendDtpicker({
+        closeOnSelected: true,
+        futureOnly:true,
+        autodateOnStart:false
+      });
+      $( "#suggest" ).autocomplete({
+  appendTo: "#location",
+  autofocus:true
+});
+      $('[id^="upvote"]').click(function(){
+        var id=event.target.id
+        id=id.substr(id.indexOf('-')+1,id.length-1);
+        upvote(id);
+      });
+      $('[id^="rowbutton"]').click(function(){
+      deleteEvent(event.target.id);
+     });
+
+       /*$( "#upComingEvents .week" ).wrapAll( "<div class='Week' />");
+       if($('.Week').length>0)
+       $('.Week').prepend('<h4><b>This Week</b></h4><hr>');
+       $( "#upComingEvents .month" ).wrapAll( "<div class='Month' />");
+       if($('.Month').length>0)
+        $('.Month').prepend('<h4><b>This Month</b></h4><hr>');
+       $("#upComingEvents .other").wrapAll('<div class="Other" />');
+       if($('.Other').length>0)
+        $('.Other').prepend('<h4><b>Other Events</h4></b><hr>');*/
+      $( "#upComingEvents .today" ).wrapAll( "<div class='Today' />");
+      if($('.Today').length>0)
+      {
+        var datetime='<time  class="icon"><em><%= moment().format("ddd"); %></em>'+'<strong><%=moment().format("MMM"); %></strong>'+'<span'+'><%= moment().date() %></span></time>';
+          $('.Today').prepend('<div id="header">'+datetime+'<br><h4>&nbsp TODAY</h4></div><hr style="clear:both">');
+      }
+       $('[id^="row "]').on('hover',function(){
+        $('[id^="rowbutton "]').show();
+       });
+        $('[id^="row "]').on('mouseleave',function(){
+        $('[id^="rowbutton "]').hide();
+       });
+        $('#showEvents').click(function(){
+          $('#upComingEvents').toggle();
+          if(document.getElementById('upComingEvents').style.display=='block')
+           $('#showEvents').html("Upcoming events <span class='glyphicon glyphicon-menu-up' style='flot:right'></span>");
+         else
+          $('#showEvents').html("Upcoming events <span class='glyphicon glyphicon-menu-down' style='flot:right'></span>");
+        });
+        $('#startDiscussion').click(function(){
+          alert('clicked');
+          getPartcipantId("participant_discussion","participants_id_discussion");
+          post();
+          });
+        $('[id^="viewAll"]').click(function(){
+          var id=event.target.id;
+          id=id.substr(id.indexOf('-'),id.length-1);
+          viewAll(id);
+
+        });
+    });
+    function upvote(id)
+    {
+      var userId= document.getElementById('userId').value;
+      var xhttp = new XMLHttpRequest();
+      xhttp.onreadystatechange = function() {
+      if (this.readyState == 4 && this.status == 200) {
+        console.log(this.responseText);
+        if(this.responseText==='done')
+          $('#upvote-'+id).html('upvoted');
+        }
+
+    };
+
+  xhttp.open("GET", "https://6db78e82.ngrok.io/upvote?userId="+userId+"&username=<%=username%>&comment_id="+id, true);
+  xhttp.send();
+
+    }
    function getContacts()
    {
     var userId= document.getElementById('userId').value;
@@ -136,10 +225,9 @@ time.icon span
         }
       obj=JSON.parse(this.responseText);
       console.log(obj);
-
     }
   };
-  xhttp.open("GET", "https://bacccc68.ngrok.io/getContacts?userId="+userId, true);
+  xhttp.open("GET", "https://6db78e82.ngrok.io/getContacts?userId="+userId, true);
   xhttp.send();
    }
       function search_suggest()
@@ -181,10 +269,14 @@ time.icon span
       }
     }
 
-    function loadUserSuggestions()
+    function loadUserSuggestions(id,suggestion)
     {
-      document.getElementById('participantSuggestion').innerHTML="";
-      var q=document.getElementById('participants').value;
+      console.log(id);
+      id=id+'';
+      suggestion=suggestion+'';
+      console.log(suggestion);
+      document.getElementById(suggestion).innerHTML="";
+      var q=document.getElementById(id).value;
       if(q.length>1)
       {
       q=q.substr(q.lastIndexOf(',')+1).toUpperCase();
@@ -193,22 +285,25 @@ time.icon span
         var temp=obj[i].firstName.toUpperCase();
     if(temp.indexOf(q)===0)
 
-      document.getElementById('participantSuggestion').innerHTML+='<li id="suggestion" class="suggest" style="list-style-type:none;">'+obj[i].firstName+'</button>';
+      document.getElementById(suggestion).innerHTML+='<li id="suggestion" class="suggest" style="list-style-type:none;">'+obj[i].firstName+'</button>';
       }
       $('.suggest').click(function(){
-        var str=document.getElementById('participants').value;
+        var str=document.getElementById(id).value;
         str = str.substr(0, str.lastIndexOf(","));
         if(str!="")
-        document.getElementById('participants').value=str+','+this.innerHTML+',';
+        document.getElementById(id).value=str+','+this.innerHTML+',';
       else
-        document.getElementById('participants').value=this.innerHTML+','
-      document.getElementById('participantSuggestion').innerHTML="";
+        document.getElementById(id).value=this.innerHTML+','
+      document.getElementById(suggestion).innerHTML="";
       });
     }
     }
-    function getPartcipantId()
+    function getPartcipantId(idInput,idValue)
     {
-      var participants=document.getElementById('participants').value.split(',');
+      alert('in participants_id');
+      idInput=idInput+'';
+      idValue=idValue+'';
+      var participants=document.getElementById(idInput).value.split(',');
       var participants_id="";
       var participant,participants_array=[];
       for(var i=0;i<participants.length-1;i++)
@@ -219,42 +314,84 @@ time.icon span
         participants_id+=object.id+',';
         participant={participant_id:object.id,participant_name:object.firstName};
         participants_array.push(participant);
-        console.log(participants);
         if(object.id===undefined)
           return false;
       }
-      document.getElementById('participants_id').value=JSON.stringify(participants_array);
+      var participants=JSON.stringify(participants_array);
+      document.getElementById('participants_id').value=participants;
     }
     function showForm()
     {
-      document.getElementById('addEvent').style.display='block';
+      $('#addEvent').toggle();
+      if(document.getElementById('newEvent').style.display=='block')
+        $('#newEvent').html("Create new Event <span class='glyphicon glyphicon-menu-up' style='flot:right'></span>");
+      else
+        $('#newEvent').html("Create new Event <span class='glyphicon glyphicon-menu-down' style='flot:right'></span>");
      }
      function deleteEvent(id)
      {
       var url="";
       id=id.substr(id.indexOf(' '),id.length);
-      var userId= document.getElementById('userId').value;
-      url="https://bacccc68.ngrok.io/delete?event_id="+id+'&user_id='+userId+'&username=<%=username%>';
+      var userId=document.getElementById('userId').value;
+      url="https://6db78e82.ngrok.io/delete?event_id="+id+'&user_id='+userId+'&username=<%=username%>';
       location.href=url;
    }
-     </script>
+   function newDiscussion()
+   {
+    $('#addDiscussion').toggle();
+   }
+   function post()
+   {
+    var discussion_name=$('#discussionName').val();
+    var participants=JSON.stringify($('#participants_id_discussion').val());
+    var userId=$('#userId').val();
+    var username=$('#username').val();
+    var discussion={discussion_name:discussion_name,participants:participants,userId:userId,username:username};
+    $.post("https://6db78e82.ngrok.io/newDiscussion",discussion,function(data, status){
+        if(data==='done')
+          {
+        location.reload();
+      }
+    });
+   }
+  </script>
  </head>
  <body onload='getContacts();'>
 
-  <% if(typeof added!== 'undefined') {%>
+  <% console.log(userId); if(typeof added!== 'undefined') {%>
   <div class="alert alert-success">
-  <strong>Event was added successfully</strong> .
+  <strong>Event was added successfully</strong>
 </div>
+<% } %>
+<% if(typeof discussionAdded==='success'){%>
+<script>
+ flock.openWidget('https://6db78e82.ngrok.io/showSuggestion','modal','modal');
+ </script>
+ <div class="alert alert-success">
+  <strong>Discussion was created successfully</strong> .
+</div>
+
+<% } %>
+<% if(typeof commentAdded==='success'){%>
+<div class="alert alert-success">
+  <strong>Comment Posted successfully</strong> .
+</div>
+
 <% } %>
   <% if(typeof deleted!== 'undefined') {%>
   <div class="alert alert-success">
   <strong>Event was deleted successfully</strong> .
 </div>
 <% } %>
-  <div id='upComingEvents'>
+<button type='button' id='showEvents' class='btn-default btn-block'>Upcoming events <span class='glyphicon glyphicon-menu-down'></span></button>
+<br>
+  <div id='upComingEvents' style='display:none'>
     <hr>
     <div id='header'>
-      <% rows=JSON.parse(rows);
+      <%
+      console.log(rows);
+      rows=JSON.parse(rows);
+      console.log(rows);
       function isEmptyObject(obj) {
   for (var key in obj) {
     if (Object.prototype.hasOwnProperty.call(obj, key)) {
@@ -264,7 +401,6 @@ time.icon span
   return true;
 }
 if(!isEmptyObject(rows)){ %>
-  <h4 style='float:left;margin-left:5px'>Upcoming events</h4><button id='newEvent' style='float:right;margin-top:10px;margin-right:5px;margin-bottom:8px' onClick='showForm();' class='btn-primary'><span class='glyphicon glyphicon-plus'></span></button><hr style='clear:both'></div>
 
 <% for(var key in rows){ %>
 
@@ -282,12 +418,12 @@ if(!isEmptyObject(rows)){ %>
   </button><br>
     <b><p style='float:left'>Event Type:</b> <%= rows[key][0].event_type %></p>
   <% if(rows[key][0].createdBy===userId) {%>
- <br/> <p style='float:right'>Created By You</p>
+  <p style='float:right'>Created By You</p>
   <% } else{ %>
-  <p style=''>Created By <%=rows[key][0].createdBy_name %></p>
+  <p style='float:right'>Created By <%=rows[key][0].createdBy_name %></p>
   <% } %>
-   <br/><b><p style='float:left'>      Scheduled </b><%= moment(rows[key][0].time).fromNow() %></p>
-  <br/><b><p style='clear:both;'>Venue:</b> <%= rows[key][0].location %></p>
+   <b><p style='float:left'>Scheduled </b><%= moment(rows[key][0].time).fromNow() %></p>
+  <b><p style='clear:both;'>Venue:</b><a href="https://foursquare.com/v/<%= rows[key][0].venue_id %>" target="_blank"><%= rows[key][0].location %></a></p>
   <b><p>Participants:</b>
   <% for(var j=0;j<rows[key].length;j++){ %>
   <% if(rows[key][j].participant_name==null){ %>No participants</p><% break;} %><%= rows[key][j].participant_name %>
@@ -295,67 +431,30 @@ if(!isEmptyObject(rows)){ %>
   <br>
  </div> <hr style='clear:both'>
   <% }}else { %>
-  <h4 style='float:left;margin-top:0px'>You don't have any upcoming events</h4><button id='newEvent' style='float:right' onClick='showForm();' class='btn-primary'><span class='glyphicon glyphicon-plus'></span>  &nbsp Click to add a new Event</button></div>
+  <h4 style='float:left;margin-top:0px'>You don't have any upcoming events</h4><button id='newEvent' style='float:right' onClick='showForm();' class='btn-default'><span class='glyphicon glyphicon-plus'></span>  &nbsp Click to add a new Event</button></div>
     <div style='clear:both'></div>
 
 <% } %>
 
 
-
 </div>
+</div>
+<button id='newEvent' type='button' style='float:right;margin-top:10px;margin-right:5px;margin-bottom:8px' onClick='showForm();' class='btn-default btn-block'>Create a new Event <span class='glyphicon glyphicon-menu-down'></span></button><hr style='clear:both'></div>
     <div id='addEvent' style='display:none'>
-  <h4>Create new event</h4>
-  <hr>
-  <form action='https://bacccc68.ngrok.io/addEvent' method="POST">
+  <form action='https://6db78e82.ngrok.io/addEvent' method="POST">
     <div class='form-group'>
     <label for='eventType'>Event type: </label>
    <input name='eventType' id='eventType' type='text' class='form-control' autofocus autocomplete='off' required>
  </div>
  <div class='form-group'>
     <label for='participants'>People invited:</label>
-    <input name='participants' id='participants' class='form-control' type='text' onkeydown='loadUserSuggestions()' autocomplete='off' required/>
+    <input name='participants' id='participants' class='form-control' type='text' onkeydown='loadUserSuggestions("participants","Suggestion_event")' autocomplete='off' required/>
   </div>
-     <div id='participantSuggestion'></div>
+     <div id='Suggestion_event'></div>
     <div class='form-group'>
       <label for='date'>Date:</label>
     <input type="text" name='date' class='form-control' id='date' autocomplete='off' required/>
   </div>
-    <script> $(document).ready(function(){
-      $('#date').appendDtpicker({
-        closeOnSelected: true,
-        futureOnly:true,
-        autodateOnStart:false
-      });
-      $( "#suggest" ).autocomplete({
-  appendTo: "#location",
-  autofocus:true
-});
-      $('[id^="rowbutton"]').click(function(){
-      deleteEvent(event.target.id);
-     });
-      $( "#upComingEvents .today" ).wrapAll( "<div class='Today' />");
-      if($('.Today').length>0)
-      {
-        var datetime='<time  class="icon"><em><%= moment().format("ddd"); %></em>'+'<strong><%=moment().format("MMM"); %></strong>'+'<span'+'><%= moment().date() %></span></time>';
-          $('.Today').prepend('<div id="header">'+datetime+'<br><h4>&nbsp TODAY</h4></div><hr style="clear:both">');
-      }
-       $( "#upComingEvents .week" ).wrapAll( "<div class='Week' />");
-       if($('.Week').length>0)
-       $('.Week').prepend('<h4><b>This Week</b></h4><hr>');
-       $( "#upComingEvents .month" ).wrapAll( "<div class='Month' />");
-       if($('.Month').length>0)
-        $('.Month').prepend('<h4><b>This Month</b></h4><hr>');
-       $("#upComingEvents .other").wrapAll('<div class="Other" />');
-       if($('.Other').length>0)
-        $('.Other').prepend('<h4><b>Other Events</h4></b><hr>');
-       $('[id^="row "]').on('hover',function(){
-        $('[id^="rowbutton "]').show();
-       });
-        $('[id^="row "]').on('mouseleave',function(){
-        $('[id^="rowbutton "]').hide();
-       });
-    });
-    </script>
     <div class='form-group'>
     <label for='location'>Venue: </label>
     <input name='location' id='location' class='form-control ui-autocomplete-input' type='text' required onkeydown='search_suggest();' autocomplete='off'/>
@@ -365,7 +464,66 @@ if(!isEmptyObject(rows)){ %>
     <input type='hidden' name='username' value= <%= username %> >
     <input type='hidden' name='participants_id' id='participants_id'>
     <input type='hidden' name='venue_id' id='venue_id'>
-    <button type='buttom' onClick='getPartcipantId();' class='btn-primary btn-block'>Invite</button>
+    <button type='buttom' onClick='getPartcipantId("participants","participants_id");' class='btn-default btn-block'>Invite</button>
   </form>
 </div>
+<button id='newDiscussion' style='float:right;margin-top:10px;margin-right:5px;margin-bottom:8px' onClick='newDiscussion();' class='btn-default btn-block'>Create a new discussion <span class='glyphicon glyphicon-menu-down'></span></button><hr style='clear:both'></div>
+<button id='showFood' onClick="flock.openWidget('https://6db78e82.ngrok.io/showSuggestion', 'modal', 'modal')" style="float: left" class="btn-default">
+    <i class="fa fa-cutlery" aria-hidden="true"></i> Restaurants
+</button>
+<button id='showMovies' onClick="flock.openWidget('https://6db78e82.ngrok.io/movies', 'modal', 'modal')" style="float: right" class="btn-default">
+    <i class="fa fa-film" aria-hidden="true"></i> Movies
+</button>
+<br/>
+<div id='addDiscussion' style='display:none'>
+
+    <div class='form-group'>
+    <label for='discussionName'>Name of discussion: </label>
+   <input name='discussionName' id='discussionName' type='text' class='form-control' autofocus autocomplete='off' required>
+ </div>
+ <div class='form-group'>
+    <label for='participant_discussion'>People invited:</label>
+    <input name='participant_discussion' id='participant_discussion' class='form-control' type='text' onkeydown='loadUserSuggestions("participant_discussion","Suggestion_discussion")' autocomplete='off' required/>
+  </div>
+     <div id='Suggestion_discussion'></div>
+    <input type='hidden' name='userId' id='userId' value= <%= userId %> >
+    <input type='hidden' name='username' id='username' value= <%= username %> >
+    <input type='hidden' name='participants' id='participants_id_discussion'>
+    <button type='buttom' id='startDiscussion' class='btn-default btn-block'>Start discussion</button>
+  </form>
+</div>
+<hr>
+
+<%
+
+
+if(typeof latestcomments !== 'undefined' && latestcomments.length>0){
+
+latestcomments=JSON.parse(latestcomments);
+
+for(var i=0;i<latestcomments.length;i++){ %>
+<div id='discussion-<%= latestcomments[i][0].discussion_id %>'>
+  <b><%= latestcomments[i][0].discussion_name %></b><hr>
+  <% for(var j=0;j<latestcomments[i].length;j++) {
+
+  if(latestcomments[i][j].comment_id) {%>
+  <div id='comment-<%=latestcomments[i][j].comment_id %>'>
+    <p><%- latestcomments[i][j].comment %></p>
+    <button style='float:left' type='button' id='upvote-<%=latestcomments[i][j].comment_id %>'>Upvote</button>
+    <hr style='clear:both'>
+  </div>
+
+<% } }%>
+  <form action='https://6db78e82.ngrok.io/addComment' method='post'>
+    <input type='text'  name='comment'>
+    <input type='hidden' id='userId' name='userId' value=<%= userId %>>
+    <input type='hidden' id='username' value=<%=username %>>
+    <input type='hidden' id='discussion_id' name='discussion_id' value=<%=latestcomments[i][0].discussion_id%>>
+    <button type='submit' >Add</button>
+  </form>
+  <hr>
+</div>
+
+<% } %>
+<% }%>
 </body>

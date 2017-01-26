@@ -76,48 +76,49 @@ flock.events.on('app.uninstall', function (event) {
         console.log('deleted ');
     })
 });
-function checkTime(){
-    var date=new Date();
-    var event_id,participant_id,location,createdBy,venue_id,createdBy_name;
-    con.query('Select * from events',function(err,rows){
-        if(err) throw err;
-        if(rows.length>0)
-        {
-            for(var i=0;i<rows.length;i++)
-            {
-                if(moment(rows[i].time).diff(moment(),'minutes')==60)
-                {
-                    event_id=rows[i].event_id;
-                    location=rows[i].location;
-                    createdBy=rows[i].createdBy;
-                    createdBy_name=rows[i].createdBy_name;
-                    event_type=rows[i].event_type;
-                    venue_id=rows[i].venue_id;
-                    con.query('select * from event_participants where event_id=?',event_id,function(err,res){
+function checkTime() {
+    var date = new Date();
+    var event_id, participant_id, location, createdBy, venue_id, createdBy_name;
+    con.query('Select * from events', function (err, rows) {
+        if (err) throw err;
+        if (rows.length > 0) {
+            for (var i = 0; i < rows.length; i++) {
+                if (moment(rows[i].time).diff(moment(), 'minutes') == 60) {
+                    event_id = rows[i].event_id;
+                    location = rows[i].location;
+                    createdBy = rows[i].createdBy;
+                    createdBy_name = rows[i].createdBy_name;
+                    event_type = rows[i].event_type;
+                    venue_id = rows[i].venue_id;
+                    con.query('select * from event_participants where event_id=?', event_id, function (err, res) {
                         console.log(err);
-                        for(var j=0;j<res.length;j++)
-                        {
-                            participant_id=res[j].participant_id;
+                        for (var j = 0; j < res.length; j++) {
+                            participant_id = res[j].participant_id;
                             console.log(participant_id);
-                            flock.callMethod('chat.sendMessage',config.botToken,{
-                                    to:participant_id,
-                                    attachments:[{
+                            flock.callMethod('chat.sendMessage', config.botToken, {
+                                    to: participant_id,
+                                    attachments: [{
                                         title: "Invitation",
                                         description: "Event Reminder",
                                         views: {
-                                            flockml:'<flockml>This is to remind you that the event '+event_type+' at <a href="https://foursquare.com/v/'+venue_id+'">'+location+'</a> for which you were invited by <user userId="'+createdBy+'">'+createdBy_name+'</user> will take place in an hour. '
+                                            flockml: '<flockml>This is to remind you that the event ' + event_type + ' at <a href="https://foursquare.com/v/' + venue_id + '">' + location + '</a> for which you were invited by <user userId="' + createdBy + '">' + createdBy_name + '</user> will take place in an hour. '
                                         },
-                                        buttons:[{
-                                            name:'View',
-                                            action:{type:'openWidget',desktopType:'sidebar',mobileType:'sidebar',url:'https://bacccc68.ngrok.io/eventBar'},
-                                            id:'view',
+                                        buttons: [{
+                                            name: 'View',
+                                            action: {
+                                                type: 'openWidget',
+                                                desktopType: 'sidebar',
+                                                mobileType: 'sidebar',
+                                                url: 'https://6db78e82.ngrok.io/eventBar'
+                                            },
+                                            id: 'view',
 
                                         }]
                                     }]
 
                                 }
-                                ,function(err,response){
-                                    if(err) console.log(err);
+                                , function (err, response) {
+                                    if (err) console.log(err);
                                 });
                         }
                     });
@@ -127,15 +128,15 @@ function checkTime(){
     });
 }
 checkTime();
-var cronJob = cron.scheduleJob("00 *  * * *", function(){
+var cronJob = cron.scheduleJob("00 *  * * *", function () {
     checkTime();
 
 });
-movies.getContents('Chennai');
-var scrapeImage = cron.scheduleJob("00 0 1 * *", function(){
-    console.log('Scrape Image');
-    movies.getContents('Chennai');
-});
+// movies.getContents('Chennai');
+// var scrapeImage = cron.scheduleJob("00 0 1 * *", function () {
+//     console.log('Scrape Image');
+//     movies.getContents('Chennai');
+// });
 
 function sendReminderForNonAdhocOutings() {
     var date = new Date();
@@ -157,17 +158,17 @@ function sendReminderForNonAdhocOutings() {
                                     "title": "You could try awesome food at some of these locations",
                                     "description": "Bringing you some of the best places near you..",
                                     "views": {
-                                        "widget": {"src": config.siteAddress + '/food', height: 400}
+                                        "widget": {"src": config.siteAddress + '/showSuggestion', height: 400}
                                     }
                                 },
                                 {
                                     "title": "Movies showing around you",
                                     "description": "Well, why dont you folks try one of these movies now ??",
                                     "views": {
-                                        "widget": {"src": config.siteAddress + '/movies', height: 300, width:300}
+                                        "widget": {"src": config.siteAddress + '/movies', height: 300, width: 300}
                                     }
                                 }
-                                ]
+                            ]
                         }
                     };
 
@@ -197,9 +198,9 @@ function sendReminderForNonAdhocOutings() {
             }
         }
     });
-    con.query('Select * from events where notification_sent=false',[],function(err,rows){
-        for(var i=0; i<rows.length; i++){
-            if (moment().diff(moment(rows[i].lastReceivedMessageTime), 'days') >= 1) {
+    con.query('Select * from events where notification_sent=false', [], function (err, rows) {
+        for (var i = 0; i < rows.length; i++) {
+            if (moment().diff(moment(rows[i].lastReceivedMessageTime), 'minutes') >= 1) {
                 var options = {
                     uri: config.incomingHookUrl,
                     method: 'POST',
@@ -207,8 +208,8 @@ function sendReminderForNonAdhocOutings() {
                         "text": OUTING_COMPLETE_MESSAGE,
                     }
                 };
-                con.query('update events set notification_sent=true where event_id=?',[rows[i].event_id], function(err,res){
-                    if(err) throw err;
+                con.query('update events set notification_sent=true where event_id=?', [rows[i].event_id], function (err, res) {
+                    if (err) throw err;
                 });
 
 
@@ -292,7 +293,7 @@ app.post('/callback', function (req, res) {
                                         "title": "You could try awesome food at some of these locations",
                                         "description": "Bringing you some of the best places near you..",
                                         "views": {
-                                            "widget": {"src": config.siteAddress + '/food', height: 400}
+                                            "widget": {"src": config.siteAddress + '/showSuggestion', height: 400}
                                         }
                                     }
                                     // {
@@ -302,7 +303,7 @@ app.post('/callback', function (req, res) {
                                     //         "widget": {"src": config.siteAddress + '/movies', height: 400}
                                     //     }
                                     // }
-                                    ]
+                                ]
                             }
                         };
 
@@ -351,7 +352,7 @@ app.post('/callback', function (req, res) {
     });
 });
 
-app.get('/food',function(req,res){
+app.get('/food', function (req, res) {
     var token = req.get('x-flock-event-token') || req.query.flockEventToken;
     if (token) {
         var payload = flock.events.verifyToken(token);
@@ -361,11 +362,12 @@ app.get('/food',function(req,res){
             return;
         }
         res.locals.eventTokenPayload = payload;
-        res.render(path.join(__dirname+'/food'),{userId:payload.userId});
-    }});
+        res.render(path.join(__dirname + '/food'), {userId: payload.userId});
+    }
+});
 
 app.get('/movies', function (req, res) {
-    movies.fetchScrapedMovies(function(response){
+    movies.fetchScrapedMovies(function (response) {
         res.render(path.join(__dirname + '/movies'), {movies: response});
     });
 });
@@ -408,21 +410,20 @@ app.listen(port, function () {
 });
 
 
-app.get('/scrape',function(req,res){
-    var city=req.query.city;
-    var link,movies=[],title;
-    url="https://www.ticketnew.com/"+city+'/movies';
+app.get('/scrape', function (req, res) {
+    var city = req.query.city;
+    var link, movies = [], title;
+    url = "https://www.ticketnew.com/" + city + '/movies';
     console.log(url);
-    request(url, function(error, response, html){
+    request(url, function (error, response, html) {
 
-        if(!error && response.statusCode==200){
+        if (!error && response.statusCode == 200) {
             var $ = cheerio.load(html);
-            var mainClass=$('.theatre_sections');
-            for(var i=0;i<mainClass.length;i++)
-            {
+            var mainClass = $('.theatre_sections');
+            for (var i = 0; i < mainClass.length; i++) {
                 console.log(mainClass.length);
-                link=mainClass.eq(i).first().find('a').attr('href')+'/C/chennai';
-                link=link.replace('Release-Date','Online-Advance-Booking')
+                link = mainClass.eq(i).first().find('a').attr('href') + '/C/chennai';
+                link = link.replace('Release-Date', 'Online-Advance-Booking')
                 movies.push({
                     link: link,
                 });
@@ -436,52 +437,53 @@ app.get('/scrape',function(req,res){
             throw error;
     });
 });
-app.get('/download.png',function(req,res){
+app.get('/download.png', function (req, res) {
     res.sendFile(path.join(__dirname + '/download.png'));
 });
-app.get('/icon',function(req,res){
-  res.sendFile(path.join(__dirname + '/icon.png'))
+app.get('/icon', function (req, res) {
+    res.sendFile(path.join(__dirname + '/icon.png'))
 })
 app.post('/scrapeImage', function (req, res) {
     "use strict";
-    let urls = [],movies=[];
-    var links=req.body,counter=0;
+    let urls = [], movies = [];
+    var links = req.body, counter = 0;
     for (let y = 0; y < links.length; y++) {
         urls.push(links[y].link);
     }
 
     function httpGet(url, callback) {
         const options = {
-            url :  url,
-            json : true
+            url: url,
+            json: true
         };
         request(options,
-            function(err, res, html) {
-                if(html){
-                    var $$=cheerio.load(html);
-                    let status="";
-                    let mainId=$$('#divMoviedetails');
-                    let img=$$('.mov_img_b').find('img').attr('src') || $$('.movie-info-image').find('img').attr('src');
-                    let movieDetails=mainId.eq(1);
-                    let title=$$('span[itemprop="name"]').attr('title')|| $$('.movie_info_b_l_info h3').text();
-                    let language=$$('span[itemprop="inLanguage"]').html()|| $$('.sub_til >ul>li').first().text();
-                    if($$('#movies-date-container').length>0)
-                        status='Now showing';
+            function (err, res, html) {
+                if (html) {
+                    var $$ = cheerio.load(html);
+                    let status = "";
+                    let mainId = $$('#divMoviedetails');
+                    let img = $$('.mov_img_b').find('img').attr('src') || $$('.movie-info-image').find('img').attr('src');
+                    let movieDetails = mainId.eq(1);
+                    let title = $$('span[itemprop="name"]').attr('title') || $$('.movie_info_b_l_info h3').text();
+                    let language = $$('span[itemprop="inLanguage"]').html() || $$('.sub_til >ul>li').first().text();
+                    if ($$('#movies-date-container').length > 0)
+                        status = 'Now showing';
                     else
-                        status='Coming soon';
+                        status = 'Coming soon';
                     movies.push({
-                        title:title,
-                        img:img,
-                        language:language,
-                        status:status,
-                        url:url
+                        title: title,
+                        img: img,
+                        language: language,
+                        status: status,
+                        url: url
                     });
                     callback(err, movies);
                 }
             }
         );
     }
-    async.map(urls, httpGet, function (err, res1){
+
+    async.map(urls, httpGet, function (err, res1) {
         if (err) return console.log(err);
         console.log(movies.length);
         res.send(movies);
@@ -489,7 +491,7 @@ app.post('/scrapeImage', function (req, res) {
 });
 
 // viewed at http://localhost:8080
-app.get('/',function(req, res) {
+app.get('/', function (req, res) {
     var token = req.get('x-flock-event-token') || req.query.flockEventToken;
     if (token) {
         var payload = flock.events.verifyToken(token);
@@ -499,49 +501,25 @@ app.get('/',function(req, res) {
             return;
         }
         res.locals.eventTokenPayload = payload;
-        con.query('SELECT * FROM todo where userId=?',[payload.userId],function(err,rows){
-            jrows=JSON.stringify(rows);
-            res.render(path.join(__dirname + '/todo'),{userId:payload.userId,rows:jrows});
+        con.query('SELECT * FROM todo where userId=?', [payload.userId], function (err, rows) {
+            jrows = JSON.stringify(rows);
+            res.render(path.join(__dirname + '/todo'), {userId: payload.userId, rows: jrows});
         });
     }
     else
         res.sendStatus(403)
 });
 
-app.get('/eventBar',function(req,res){
-    var token = req.get('x-flock-event-token') || req.query.flockEventToken;
-    var userName="";
-    if (token) {
-        var payload = flock.events.verifyToken(token);
-        if (!payload) {
-            console.log('Invalid event token', token);
-            res.sendStatus(403);
-            return;
-        }
-        res.locals.eventTokenPayload = payload;
-        con.query('select *  from event_participants P right join events E on P.event_id=E.event_id',function(err,res1){
-            if(!err)
-            {
-                res1=groupArray(res1,'event_id');
-                res1=JSON.stringify(res1);
-                userName=JSON.parse(req.query.flockEvent).userName;
-                console.log(userName);
-                res.render(path.join(__dirname + '/event_organizer'),{userId:payload.userId,username:userName,rows:res1});
-            }
-        })
 
-    }
-});
-app.get('/getContacts',function(req,res){
-    var userId=req.query.userId;
+app.get('/getContacts', function (req, res) {
+    var userId = req.query.userId;
     console.log(userId);
-    con.query('SELECT token from tokens where uid=?', userId, function(err,res1){
-        if(!err)
-        {
+    con.query('SELECT token from tokens where uid=?', userId, function (err, res1) {
+        if (!err) {
             console.log('nice');
-            var token=res1['0'].token;
-            flock.callMethod('roster.listContacts',token,{},function(error,response){
-                if(!error)
+            var token = res1['0'].token;
+            flock.callMethod('roster.listContacts', token, {}, function (error, response) {
+                if (!error)
                     res.send(response);
                 else
                     console.log(error);
@@ -549,64 +527,64 @@ app.get('/getContacts',function(req,res){
         }
     });
 });
-app.get('/delete',function(req,res){
-    var event_id=req.query.event_id;
+app.get('/delete', function (req, res) {
+    var event_id = req.query.event_id;
     console.log(event_id);
-    var user_id=req.query.user_id;
-    var username=req.query.username;
-    var date,location,venue_id,createdBy,event_type;
-    con.query('Select * from events where event_id=?',event_id,function(error,response){
-        if(error) console.log(error);
-        else
-        {
-            event_type=response[0].event_type;
-            location=response[0].location;
-            venue_id=response[0].venue_id;
-            date=response.time;
-            date=moment(date).format("dddd, MMMM Do YYYY, h:mm:ss a");
-            username=response[0].createdBy_name;
-            createdBy=response[0].createdBy;
+    var user_id = req.query.user_id;
+    var username = req.query.username;
+    var date, location, venue_id, createdBy, event_type;
+    con.query('Select * from events where event_id=?', event_id, function (error, response) {
+        if (error) console.log(error);
+        else {
+            event_type = response[0].event_type;
+            location = response[0].location;
+            venue_id = response[0].venue_id;
+            date = response.time;
+            date = moment(date).format("dddd, MMMM Do YYYY, h:mm:ss a");
+            username = response[0].createdBy_name;
+            createdBy = response[0].createdBy;
             console.log(user_id);
-            if(createdBy===user_id)
-            {
+            if (createdBy === user_id) {
                 console.log('delete admin');
-                con.query('select participant_id from event_participants where event_id=?',event_id,function(err,response){
-                    if(err) console.log(err);
-                    else
-                    {
+                con.query('select participant_id from event_participants where event_id=?', event_id, function (err, response) {
+                    if (err) console.log(err);
+                    else {
                         console.log(response);
-                        for(var i=0;i<response.length;i++){
+                        for (var i = 0; i < response.length; i++) {
                             console.log('hello');
                             console.log(response[i]);
-                            flock.callMethod('chat.sendMessage',config.botToken,{
-                                to:response[i].participant_id,
+                            flock.callMethod('chat.sendMessage', config.botToken, {
+                                to: response[i].participant_id,
                                 //text: 'You have been invited for '+event_type+' at '+location+' by '+username,
-                                attachments:[{
+                                attachments: [{
                                     title: "Cancellation of Event",
                                     description: "Event cancellation",
                                     views: {
-                                        flockml:'<flockml>This is to inform you that the event plan: '+event_type+' at <a href="https://foursquare.com/v/'+venue_id+'">'+location+'</a> created by <user userId="'+user_id+'">'+username+'</user> on '+date+' is cancelled due to some unavoidable reasons.'
+                                        flockml: '<flockml>This is to inform you that the event plan: ' + event_type + ' at <a href="https://foursquare.com/v/' + venue_id + '">' + location + '</a> created by <user userId="' + user_id + '">' + username + '</user> on ' + date + ' is cancelled due to some unavoidable reasons.'
                                     },
-                                    buttons:[{
-                                        name:'View',
-                                        action:{type:'openWidget',desktopType:'modal',mobileType:'sidebar',url:'https://bacccc68.ngrok.io/eventBar'},
-                                        id:'view',
+                                    buttons: [{
+                                        name: 'View',
+                                        action: {
+                                            type: 'openWidget',
+                                            desktopType: 'modal',
+                                            mobileType: 'sidebar',
+                                            url: 'https://6db78e82.ngrok.io/eventBar'
+                                        },
+                                        id: 'view',
 
                                     }]
                                 }]
 
-                            },function(error,response)
-                            {
-                                if(!error)
+                            }, function (error, response) {
+                                if (!error)
                                     console.log(response);
                                 else
                                     console.log(error);
                             });
                         }
-                        con.query('delete from events where event_id=?',event_id,function(error,res2){
-                            if(error) console.log(error);
-                            else
-                            {
+                        con.query('delete from events where event_id=?', event_id, function (error, res2) {
+                            if (error) console.log(error);
+                            else {
                                 console.log(res2);
                                 res.send('done');
                             }
@@ -614,39 +592,44 @@ app.get('/delete',function(req,res){
                     }
                 })
             }
-            else
-            {
-                flock.callMethod('chat.sendMessage',config.botToken,{
-                    to:createdBy,
+            else {
+                flock.callMethod('chat.sendMessage', config.botToken, {
+                    to: createdBy,
                     //text: 'You have been invited for '+event_type+' at '+location+' by '+username,
-                    attachments:[{
+                    attachments: [{
                         title: "Decline event invitation",
                         description: "",
                         views: {
-                            flockml:'<flockml>This is to inform you that <user userId="'+user_id+'">'+username+'</user>'+event_type+' at <a href="https://foursquare.com/v/'+venue_id+'">'+location+'</a> created by you on '+date+' due to some unavoidable reasons.'
+                            flockml: '<flockml>This is to inform you that <user userId="' + user_id + '">' + username + '</user>' + event_type + ' at <a href="https://foursquare.com/v/' + venue_id + '">' + location + '</a> created by you on ' + date + ' due to some unavoidable reasons.'
                         },
-                        buttons:[{
-                            name:'View',
-                            action:{type:'openWidget',desktopType:'modal',mobileType:'sidebar',url:'https://bacccc68.ngrok.io/eventBar'},
-                            id:'view',
+                        buttons: [{
+                            name: 'View',
+                            action: {
+                                type: 'openWidget',
+                                desktopType: 'modal',
+                                mobileType: 'sidebar',
+                                url: 'https://6db78e82.ngrok.io/eventBar'
+                            },
+                            id: 'view',
 
                         }]
                     }]
 
-                },function(error,response)
-                {
-                    if(!error)
-                    {
-                        con.query('delete from event_participants where participant_id=?',user_id,function(err,resD){
-                            if(err) console.log(err);
-                            else
-                            {
-                                con.query('select *  from event_participants P right join events E on P.event_id=E.event_id',function(err,res1){
-                                    if(!err)
-                                    {
-                                        res1=groupArray(res1,'event_id');
-                                        res1=JSON.stringify(res1);
-                                        res.render(path.join(__dirname + '/event_organizer'),{userId:user_id,username:username,rows:res1,deleted:'success'});
+                }, function (error, response) {
+                    if (!error) {
+                        con.query('delete from event_participants where participant_id=?', user_id, function (err, resD) {
+                            if (err) console.log(err);
+                            else {
+                                con.query('select *  from event_participants P right join events E on P.event_id=E.event_id', function (err, res1) {
+                                    if (!err) {
+                                        res1 = groupArray(res1, 'event_id');
+                                        res1 = JSON.stringify(res1);
+                                        res.render(path.join(__dirname + '/event_organizer'), {
+                                            userId: user_id,
+                                            username: username,
+                                            rows: res1,
+                                            deleted: 'success'
+                                        });
                                     }
                                 });
                             }
@@ -660,72 +643,96 @@ app.get('/delete',function(req,res){
     });
 
 });
-app.post('/addEvent',function(req,res){
-    var username='';
-    var event_type=req.body.eventType;
-    var participants=JSON.parse(req.body.participants_id);
-    var date=req.body.date;
-    var venue_id=req.body.venue_id;
-    var location=req.body.location;
-    var userId=req.body.userId;
-    var participant,token;
-    var username=req.body.username;
-    var events={event_type:event_type,location:location,venue_id:venue_id,createdBy:userId,time:date,createdBy_name:username, notification_sent: false};
-    con.query('INSERT into events set ?',events,function(error,response){
-        if(!error)
-        {
+app.post('/addEvent', function (req, res) {
+    var username = '';
+    var event_type = req.body.eventType;
+    console.log('request');
+    console.log(req.body);
+    var participants = JSON.parse(req.body.participants_id);
+    var date = req.body.date;
+    var venue_id = req.body.venue_id;
+    var location = req.body.location;
+    var userId = req.body.userId;
+    var participant, token;
+    var username = req.body.username;
+    var events = {
+        event_type: event_type,
+        location: location,
+        venue_id: venue_id,
+        createdBy: userId,
+        time: date,
+        createdBy_name: username,
+        notification_sent: false
+    };
+    con.query('INSERT into events set ?', events, function (error, response) {
+        if (!error) {
             console.log('event added');
-            var event_id=response.insertId;
-            participants=participants.map(function(val){
-                participant={event_id:event_id,participant_id:val.participant_id,participant_name:val.participant_name};
-                con.query('SELECT token from tokens where uid=?', userId, function(err,res1){
-                    if(!err)
-                    {
-                        token=res1['0'].token;
+            var event_id = response.insertId;
+            participants = participants.map(function (val) {
+                participant = {
+                    event_id: event_id,
+                    participant_id: val.participant_id,
+                    participant_name: val.participant_name
+                };
+                con.query('SELECT token from tokens where uid=?', userId, function (err, res1) {
+                    if (!err) {
+                        token = res1['0'].token;
                         console.log(token);
-                    }});
-                con.query('INSERT into event_participants set ?',participant,function(error,response)
-                {
-                    if(!error)
-                    {
-                        date=moment(date).format("dddd, MMM YYYY, h:mm:ss a");
-                        flock.callMethod('chat.sendMessage',token,
+                    }
+                });
+                con.query('INSERT into event_participants set ?', participant, function (error, response) {
+                    if (!error) {
+                        date = moment(date).format("dddd, MMM YYYY, h:mm:ss a");
+                        flock.callMethod('chat.sendMessage', token,
                             {
-                                to:val.participant_id,
+                                to: val.participant_id,
                                 //text: 'You have been invited for '+event_type+' at '+location+' by '+username,
-                                attachments:[{
+                                attachments: [{
                                     title: "Invitation",
                                     description: "",
                                     views: {
-                                        flockml:'<flockml>You have been invited for '+event_type+' at <a href="https://foursquare.com/v/'+venue_id+'">'+location+'</a> by <user userId="'+userId+'">'+username+'</user> on '+date
+                                        flockml: '<flockml>You have been invited for ' + event_type + ' at <a href="https://foursquare.com/v/' + venue_id + '">' + location + '</a> by <user userId="' + userId + '">' + username + '</user> on ' + date
                                     },
-                                    buttons:[{
-                                        name:'View',
-                                        action:{type:'openWidget',desktopType:'modal',mobileType:'sidebar',url:'https://bacccc68.ngrok.io/eventBar'},
-                                        id:'view',
+                                    buttons: [{
+                                        name: 'View',
+                                        action: {
+                                            type: 'openWidget',
+                                            desktopType: 'modal',
+                                            mobileType: 'sidebar',
+                                            url: 'https://6db78e82.ngrok.io/eventBar'
+                                        },
+                                        id: 'view',
 
                                     },
-                                    {
-                                         name:'Decline',
-                                         action:{type:'openWidget',desktopType:'modal',mobileType:'modal',url:'https://bacccc68.ngrok.io/delete?event_id='+event_id+'&user_id='+val.participant_id+'&username='+username},
-                                         id:'decline',
-                                        icon:'https://bacccc68.ngrok.io/icon'
-                                    }]
+                                        {
+                                            name: 'Decline',
+                                            action: {
+                                                type: 'openWidget',
+                                                desktopType: 'modal',
+                                                mobileType: 'modal',
+                                                url: 'https://6db78e82.ngrok.io/delete?event_id=' + event_id + '&user_id=' + val.participant_id + '&username=' + username
+                                            },
+                                            id: 'decline',
+                                            icon: 'https://6db78e82.ngrok.io/icon'
+                                        }]
                                 }]
 
-                            },function(error,response)
-                            {
-                                if(!error)
+                            }, function (error, response) {
+                                if (!error)
                                     console.log(response);
                                 else
                                     console.log(error);
                             });
-                        con.query('select *  from event_participants P right join events E on P.event_id=E.event_id',function(err,res1){
-                            if(!err)
-                            {
-                                res1=groupArray(res1,'event_id');
-                                res1=JSON.stringify(res1);
-                                res.render(path.join(__dirname + '/event_organizer'),{userId:userId,username:username,rows:res1,added:'success'});
+                        con.query('select *  from event_participants P right join events E on P.event_id=E.event_id', function (err, res1) {
+                            if (!err) {
+                                res1 = groupArray(res1, 'event_id');
+                                res1 = JSON.stringify(res1);
+                                res.render(path.join(__dirname + '/event_organizer'), {
+                                    userId: userId,
+                                    username: username,
+                                    rows: res1,
+                                    added: 'success'
+                                });
                             }
                         })
                     }
@@ -742,6 +749,300 @@ app.use(function (req, res, next) {
     next();
 });
 
+app.get('/upvote', function (req, res) {
+    var userId = req.query.userId;
+    var username = req.query.username;
+    var comment_id = req.query.comment_id;
+    con.query('update comments set upvotes=upvotes+1 where comment_id=?', comment_id, function (error, response) {
+        if (error) console.log(error);
+        else {
+            var upvote = {comment_id: comment_id, upvoteBy: userId, upvoteBy_name: username};
+            con.query('insert into upvotes set ?', upvote, function (err, response) {
+                if (err) console.log(err);
+                else {
+                    res.send('done');
+                }
+            })
+        }
+    })
+});
+
+app.get('/getDiscussion', function (req, res) {
+    var username = JSON.parse(req.query.flockEvent).userName;
+    var userId = JSON.parse(req.query.flockEvent).userId;
+    var comments = req.body.comments;
+    console.log('in getDiscussion');
+    con.query('select D.discussion_id,D.discussion_name  from discussion_participants P right join discussions D on P.discussion_id=D.discussion_id where D.createdBy=? or P.participant_id=?', [userId, userId], function (error, userDiscussions) {
+        if (!error) {
+            //res.send(userDiscussions);
+            res.render(path.join(__dirname + '/selectDiscussion'), {
+                username: username,
+                userId: userId,
+                userDiscussions: userDiscussions,
+                comments: comments
+            });
+        }
+    });
+});
+
+app.post('/addComment', function (req, res) {
+    var givenBy = req.body.userId;
+    var discussion_id = req.body.discussion_id;
+    var comment = req.body.comment || req.body.comment;
+    console.log(comment);
+    var username = req.body.username;
+    var comment = {givenBy: givenBy, discussion_id: discussion_id, comment: comment};
+    con.query('insert into comments set ?', comment, function (error, response) {
+        if (error) console.log(error);
+        else {
+            con.query('select *  from event_participants P right join events E on P.event_id=E.event_id', function (err, res1) {
+                if (!err) {
+                    res1 = groupArray(res1, 'event_id');
+                    res1 = JSON.stringify(res1);
+                    con.query('select *  from discussion_participants P right join discussions D on P.discussion_id=D.discussion_id where D.createdBy=? or P.participant_id=?', [givenBy, givenBy], function (error, userDiscussions) {
+                        if (!error) {
+                            async.map(userDiscussions, findcomments, function (err, results) {
+                                console.log('inside async');
+                                if (err) console.log(err);
+                                if (!err) {
+                                    console.log(results);
+                                    comments = JSON.stringify(results);
+                                    res.render(path.join(__dirname + '/event_organizer'), {
+                                        username: username,
+                                        userId: givenBy,
+                                        latestcomments: comments,
+                                        rows: res1
+                                    });
+
+
+                                }
+                            });
+                        }
+                    });
+                }
+            });
+        }
+    });
+
+});
+
+var findcomments=function(val,fn){
+    console.log('in find comments');
+    con.query('select comments.comment,comments.comment_id,comments.upvotes,discussions.discussion_id,discussions.discussion_name,upvotes.upvoteBy from comments left join upvotes on comments.comment_id=upvotes.comment_id right join discussions on discussions.discussion_id=comments.discussion_id where discussions.discussion_id=?',val,function(error,results){
+        if(error) console.log(error);
+        else
+        {
+            console.log(results);
+            return fn(null,results);
+        }
+    });
+};
+
+app.get('/eventBar',function(req,res){
+    var token = req.get('x-flock-event-token') || req.query.flockEventToken;
+    var userName="";
+    console.log(token);
+
+    if (token) {
+        var payload = flock.events.verifyToken(token);
+        if (!payload) {
+            console.log('Invalid event token', token);
+            res.sendStatus(403);
+            return;
+        }
+        res.locals.eventTokenPayload = payload;
+        con.query('select *  from event_participants P right join events E on P.event_id=E.event_id',function(err,res1){
+            if(err) console.log(err);
+            if(!err)
+            {
+                res1=groupArray(res1,'event_id');
+                res1=JSON.stringify(res1);
+                console.log(res1);
+                userName=JSON.parse(req.query.flockEvent).userName;
+                con.query('select D.discussion_id  from discussion_participants P right join discussions D on P.discussion_id=D.discussion_id where D.createdBy=? or P.participant_id=?',[payload.userId,payload.userId],function(error,userDiscussions)
+                {
+                    if(error) console.log(error);
+                    if(!error)
+                    {
+                        console.log(userDiscussions);
+                        userDiscussions=userDiscussions.map(item => item.discussion_id)
+                            .filter((value, index, self) => self.indexOf(value) === index)
+                        console.log(userDiscussions);
+                        async.map(userDiscussions,findcomments,function(err,results){
+                            console.log('inside async');
+                            if(err) console.log(err);
+                            if(!err)
+                            {
+                                console.log(results);
+
+                                comments=JSON.stringify(results);
+                                res.render(path.join(__dirname + '/event_organizer'),{username:userName,userId:payload.userId,latestcomments:comments,rows:res1});
+
+
+                            }
+                        });
+
+                    }
+                });
+            }
+        });
+
+    }
+});
+
+var insertParticipants=function(discussion_id,discussion_name,userId,username){
+    return function(val,fn)
+    {
+        console.log(val);
+        var participant={discussion_id:discussion_id,participant_id:val.participant_id,participant_name:val.participant_name};
+        con.query('insert into discussion_participants set ?',participant,function(error,response){
+
+            if(!error)
+            {
+
+                flock.callMethod('chat.sendMessage',config.botToken,{
+                    to:val.participant_id,
+                    attachments:[{
+                        title:"Discussion Channel",
+                        description:"New Discusssion channel created",
+                        views:[{
+                            flockml:"<flockml><user userId='"+userId+"'>"+username+"</user> has created a new discussion: "+discussion_name,            }]
+                    }],
+                    buttons:[{
+                        name:'View',
+                        action:{type:'openWidget',desktopType:'sidebar',mobileType:'sidebar',url:'https://6db78e82.ngrok.io/eventBar'},
+                        id:'view',
+                    }]
+                },function(error,response){
+                    if(!error)  fn(null,response);
+
+                });
+                //console.log(fn(response));
+                fn(null,'done');
+            }
+        });
+    }
+}
+app.get('/added',function(req,res){
+    res.render(path.join(__dirname + '/added'));
+})
+app.post('/newDiscussion',function(req,res){
+    console.log(req.body)
+    var discussion_name=req.body.discussion_name;
+    var status='';
+    var userId=req.body.userId;
+    var username=req.body.username;
+    var participants=JSON.parse(req.body.participants);
+    console.log('discuss'+username);
+    var discussion={discussion_name:discussion_name,createdBy:userId,createdBy_name:username};
+    con.query('Insert into discussions set ?',discussion,function(error,response){
+        if(error) {console.log(error);status='failure';}
+        else
+        {
+            status='success';
+            console.log(response)
+            var discussion_id=response.insertId;
+            console.log('participants');
+            console.log(participants);
+            async.map(participants,insertParticipants(discussion_id,discussion_name,userId,username),function(error,response){
+                if(error) console.log(error);
+                else
+                {
+                    res.send('done');
+
+                }
+            });
+        }
+
+    });
+});
+
+var getColumns=function(val,doneCallBack)
+{
+    var results= { participant_id: val.id, participant_name: val.firstName };
+    doneCallBack(null,results);
+}
+
+app.get('/showSuggestion',function(req,res){
+
+    res.render(path.join(__dirname + '/discuss'));
+});
+flock.events.on('client.slashCommand',function(event){
+    var command=event.command;
+    var to=event.chat;
+    var username=event.userName;;
+    var userId=event.userId;
+    var text=event.text;
+    console.log(text);
+    text=text.split(' ');
+    if(text[0]=='discuss'){
+
+        var discussion_name=text[1];
+        var participants=[];
+        con.query('SELECT token from userToken where userId=?', userId, function(err,res1){
+            if(!err)
+            {
+                if(res1.length>0)
+                {
+                    var token=res1['0'].token;
+                    console.log(token);
+                    flock.callMethod('groups.getMembers',token,{groupId:to},function(error,response){
+                        if(!error)
+                        {
+                            participants=response;
+                            async.map(participants,getColumns,function(error,results){
+                                if(!error) {
+                                    participants=results;
+                                    var requestData={discussion_name:discussion_name,userId:userId,username:username,participants:JSON.stringify(participants)}
+                                    request({
+                                        url:'https://6db78e82.ngrok.io/newDiscussion',
+                                        method:'POST',
+                                        json:requestData,
+                                    },function(error,response,body){
+                                        if(!error) {
+                                            if(body=='done')
+                                            {
+                                                flock.callMethod('chat.sendMessage',config.botToken,{
+                                                    to:userId,
+                                                    attachments:[{
+                                                        title: "Discussion",
+                                                        description: "",
+                                                        views: {
+                                                            flockml:'<flockml> Discussion : '+discussion_name+' was created successfully</flockml>'
+                                                        },
+                                                        buttons:[{
+                                                            name:'View',
+                                                            action:{type:'openWidget',desktopType:'sidebar',mobileType:'sidebar',url:'https://6db78e82.ngrok.io/eventBar'},
+                                                            id:'view',
+                                                        }],
+                                                    }]
+                                                },function(error,response){
+                                                    if(error) console.log(error);
+                                                    else console.log(response);
+                                                });
+                                            }
+                                        }
+                                        else console.log(error);
+                                    })
+                                }
+
+                            });
+
+
+                        }
+
+
+
+                    });
+                }
+
+            }
+        });
+    }
+});
+app.get('/icon',function(req,res){
+    res.sendFile(path.join(__dirname + '/icon.png'))
+});
 
 // exit handling -- save tokens in token.js before leaving
 process.on('SIGINT', process.exit);
