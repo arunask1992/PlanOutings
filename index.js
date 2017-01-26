@@ -26,19 +26,26 @@ app.use(bodyParser.urlencoded({extended: true}));
 // Listen for events on /events, and verify event tokens using the token verifier.
 app.use(flock.events.tokenVerifier);
 app.post('/events', flock.events.listener);
-var con = mysql.createConnection({
+var con = mysql.createPool({
+    connectionLimit : 10,
     host: config.mysqlHost,
     user: config.mysqlUser,
     password: config.mysqlPassword,
     database: config.mysqlDatabase
 });
-con.connect(function (err) {
-    if (err) {
-        console.log('Error connecting to Db');
-        return;
-    }
-    console.log('Connection established');
-});
+// var con = mysql.createConnection({
+//     host: config.mysqlHost,
+//     user: config.mysqlUser,
+//     password: config.mysqlPassword,
+//     database: config.mysqlDatabase
+// });
+// con.connect(function (err) {
+//     if (err) {
+//         console.log('Error connecting to Db');
+//         return;
+//     }
+//     console.log('Connection established');
+// });
 
 var outingTypes;
 var configuration;
