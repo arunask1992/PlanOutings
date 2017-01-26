@@ -10,6 +10,7 @@ var async = require("async");
 var cron = require('node-schedule');
 var groupArray = require('group-array');
 var moment = require('moment');
+var movies = require(path.join(__dirname + '/movies_scrapper.js'));
 flock.setAppId(config.appId);
 flock.setAppSecret(config.appSecret);
 
@@ -129,6 +130,11 @@ checkTime();
 var cronJob = cron.scheduleJob("00 *  * * *", function(){
     checkTime();
 
+});
+movies.getContents('Chennai');
+var scrapeImage = cron.scheduleJob("00 0 1 * *", function(){
+    console.log('Scrape Image');
+    movies.getContents('Chennai');
 });
 
 function sendReminderForNonAdhocOutings() {
@@ -334,7 +340,9 @@ app.get('/food',function(req,res){
     }});
 
 app.get('/movies', function (req, res) {
-    res.render(path.join(__dirname + '/movies'));
+    movies.fetchScrapedMovies(function(response){
+        res.render(path.join(__dirname + '/movies'), {movies: response});
+    });
 });
 
 app.post('/configure', function (req, res) {
