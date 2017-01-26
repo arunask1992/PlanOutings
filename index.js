@@ -133,11 +133,11 @@ var cronJob = cron.scheduleJob("00 *  * * *", function () {
     checkTime();
 
 });
-// movies.getContents('Chennai');
-// var scrapeImage = cron.scheduleJob("00 0 1 * *", function () {
-//     console.log('Scrape Image');
-//     movies.getContents('Chennai');
-// });
+movies.getContents('Chennai');
+var scrapeImage = cron.scheduleJob("00 0 1 * *", function () {
+    console.log('Scrape Image');
+    movies.getContents('Chennai');
+});
 
 function sendReminderForNonAdhocOutings() {
     var date = new Date();
