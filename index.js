@@ -110,7 +110,7 @@ function checkTime() {
                                                 type: 'openWidget',
                                                 desktopType: 'sidebar',
                                                 mobileType: 'sidebar',
-                                                url: 'https://6db78e82.ngrok.io/eventBar'
+                                                url: 'https://a38764d4.ngrok.io/eventBar'
                                             },
                                             id: 'view',
 
@@ -405,7 +405,7 @@ app.post('/configure', function (req, res) {
 
 
 // Start the listener after reading the port from config
-var port = config.port || 8080;
+var port = process.env.PORT || 8080;
 app.listen(port, function () {
     console.log('Listening on port: ' + port);
 });
@@ -569,7 +569,7 @@ app.get('/delete', function (req, res) {
                                             type: 'openWidget',
                                             desktopType: 'modal',
                                             mobileType: 'sidebar',
-                                            url: 'https://6db78e82.ngrok.io/eventBar'
+                                            url: 'https://a38764d4.ngrok.io/eventBar'
                                         },
                                         id: 'view',
 
@@ -609,7 +609,7 @@ app.get('/delete', function (req, res) {
                                 type: 'openWidget',
                                 desktopType: 'modal',
                                 mobileType: 'sidebar',
-                                url: 'https://6db78e82.ngrok.io/eventBar'
+                                url: 'https://a38764d4.ngrok.io/eventBar'
                             },
                             id: 'view',
 
@@ -700,7 +700,7 @@ app.post('/addEvent', function (req, res) {
                                             type: 'openWidget',
                                             desktopType: 'modal',
                                             mobileType: 'sidebar',
-                                            url: 'https://6db78e82.ngrok.io/eventBar'
+                                            url: 'https://a38764d4.ngrok.io/eventBar'
                                         },
                                         id: 'view',
 
@@ -711,10 +711,10 @@ app.post('/addEvent', function (req, res) {
                                                 type: 'openWidget',
                                                 desktopType: 'modal',
                                                 mobileType: 'modal',
-                                                url: 'https://6db78e82.ngrok.io/delete?event_id=' + event_id + '&user_id=' + val.participant_id + '&username=' + username
+                                                url: 'https://a38764d4.ngrok.io/delete?event_id=' + event_id + '&user_id=' + val.participant_id + '&username=' + username
                                             },
                                             id: 'decline',
-                                            icon: 'https://6db78e82.ngrok.io/icon'
+                                            icon: 'https://a38764d4.ngrok.io/icon'
                                         }]
                                 }]
 
@@ -801,7 +801,7 @@ app.post('/addExpense', function (req, res) {
                                             type: 'openWidget',
                                             desktopType: 'modal',
                                             mobileType: 'sidebar',
-                                            url: 'https://6db78e82.ngrok.io/manageExpenses'
+                                            url: 'https://a38764d4.ngrok.io/manageExpenses'
                                         },
                                         id: 'view',
 
@@ -995,7 +995,7 @@ var insertParticipants=function(discussion_id,discussion_name,userId,username){
                     }],
                     buttons:[{
                         name:'View',
-                        action:{type:'openWidget',desktopType:'sidebar',mobileType:'sidebar',url:'https://6db78e82.ngrok.io/eventBar'},
+                        action:{type:'openWidget',desktopType:'sidebar',mobileType:'sidebar',url:'https://a38764d4.ngrok.io/eventBar'},
                         id:'view',
                     }]
                 },function(error,response){
@@ -1099,7 +1099,7 @@ app.post('/settleExpense', function(req,res){
                                type: 'openWidget',
                                desktopType: 'modal',
                                mobileType: 'sidebar',
-                               url: 'https://6db78e82.ngrok.io/manageExpenses'
+                               url: 'https://a38764d4.ngrok.io/manageExpenses'
                            },
                            id: 'view',
 
@@ -1143,7 +1143,7 @@ flock.events.on('client.slashCommand',function(event){
                                     participants=results;
                                     var requestData={discussion_name:discussion_name,userId:userId,username:username,participants:JSON.stringify(participants)}
                                     request({
-                                        url:'https://6db78e82.ngrok.io/newDiscussion',
+                                        url:'https://a38764d4.ngrok.io/newDiscussion',
                                         method:'POST',
                                         json:requestData,
                                     },function(error,response,body){
@@ -1160,7 +1160,7 @@ flock.events.on('client.slashCommand',function(event){
                                                         },
                                                         buttons:[{
                                                             name:'View',
-                                                            action:{type:'openWidget',desktopType:'sidebar',mobileType:'sidebar',url:'https://6db78e82.ngrok.io/eventBar'},
+                                                            action:{type:'openWidget',desktopType:'sidebar',mobileType:'sidebar',url:'https://a38764d4.ngrok.io/eventBar'},
                                                             id:'view',
                                                         }],
                                                     }]
