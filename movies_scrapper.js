@@ -30,6 +30,7 @@ function persistMovies(obj){
             let elementToBeInserted = obj[i];
             console.log(elementToBeInserted.title);
             con.query('SELECT * from scrapedMovies where name = ?',elementToBeInserted.title, function(err,res){
+                console.log('here ' + res.length);
                 if(err) throw err;
                 else if(res.length === 0 && !!elementToBeInserted) {
                     var movieImage = !!elementToBeInserted.img ? elementToBeInserted.img : config.siteAddress + '/download.png';
