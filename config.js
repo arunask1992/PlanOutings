@@ -5,7 +5,7 @@ module.exports = {
     mysqlUser: 'root',
     mysqlPassword: '',
     mysqlDatabase: 'outings',
-    siteAddress: 'https://a38764d4.ngrok.io',
+    siteAddress: 'https://protected-chamber-96976.herokuapp.com',
     incomingHookUrl: 'https://api.flock.co/hooks/sendMessage/a531b436-484a-4e11-8d3a-d4db812cb193',
     zomatoToken:'fac8c589db81636bef4c851c66848745',
     botToken: 'ae998847-1930-4992-a934-50cc45b10777'

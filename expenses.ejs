@@ -145,7 +145,7 @@ function getContacts()
       console.log(obj);
     }
   };
-  xhttp.open("GET", "https://a38764d4.ngrok.io/getContacts?userId="+userId, true);
+  xhttp.open("GET", "https://protected-chamber-96976.herokuapp.com/getContacts?userId="+userId, true);
   xhttp.send();
   }
 
@@ -167,7 +167,7 @@ function getContacts()
             console.log(obj);
         }
       };
-      xhttp.open("POST", "https://a38764d4.ngrok.io/settleExpense", true);
+      xhttp.open("POST", "https://protected-chamber-96976.herokuapp.com/settleExpense", true);
       xhttp.send(data);
       }
 
@@ -237,7 +237,7 @@ function loadUserSuggestions(id,suggestion)
 <div class="container">
 <button id='createExpense' type='button' style='float:right;margin-top:10px;margin-right:5px;margin-bottom:8px' onClick='showForm();' class='btn-default btn-block'><i class="fa fa-rupee" >   Create new expense </i> <span class='glyphicon glyphicon-menu-down'></span></button><hr style='clear:both'></div>
 <div id='newExpense' style='display:none'>
-<form action='https://a38764d4.ngrok.io/addExpense' method="POST">
+<form action='https://protected-chamber-96976.herokuapp.com/addExpense' method="POST">
   <div class="form-group">
     <label for="expenseName">Expense Name</label>
     <input type="text" class="form-control" id="expenseName" name="expenseName">
@@ -279,7 +279,7 @@ function loadUserSuggestions(id,suggestion)
       <td><%= expenses[i].settle_to %></td>
       <td><%= expenses[i].amount %></td>
       <td>
-      <form action='https://a38764d4.ngrok.io/settleExpense' method="POST">
+      <form action='https://protected-chamber-96976.herokuapp.com/settleExpense' method="POST">
         <input type="hidden" name="expenseId" value=<%= expenses[i].expense_id %>>
         <input type="hidden" name="userId" value=<%= expenses[i].participant_id %>>
         <input type="hidden" name="userName" value=<%= expenses[i].userName %>>

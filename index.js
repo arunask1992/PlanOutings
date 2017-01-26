@@ -110,7 +110,7 @@ function checkTime() {
                                                 type: 'openWidget',
                                                 desktopType: 'sidebar',
                                                 mobileType: 'sidebar',
-                                                url: 'https://a38764d4.ngrok.io/eventBar'
+                                                url: 'https://protected-chamber-96976.herokuapp.com/eventBar'
                                             },
                                             id: 'view',
 
@@ -569,7 +569,7 @@ app.get('/delete', function (req, res) {
                                             type: 'openWidget',
                                             desktopType: 'modal',
                                             mobileType: 'sidebar',
-                                            url: 'https://a38764d4.ngrok.io/eventBar'
+                                            url: 'https://protected-chamber-96976.herokuapp.com/eventBar'
                                         },
                                         id: 'view',
 
@@ -609,7 +609,7 @@ app.get('/delete', function (req, res) {
                                 type: 'openWidget',
                                 desktopType: 'modal',
                                 mobileType: 'sidebar',
-                                url: 'https://a38764d4.ngrok.io/eventBar'
+                                url: 'https://protected-chamber-96976.herokuapp.com/eventBar'
                             },
                             id: 'view',
 
@@ -700,7 +700,7 @@ app.post('/addEvent', function (req, res) {
                                             type: 'openWidget',
                                             desktopType: 'modal',
                                             mobileType: 'sidebar',
-                                            url: 'https://a38764d4.ngrok.io/eventBar'
+                                            url: 'https://protected-chamber-96976.herokuapp.com/eventBar'
                                         },
                                         id: 'view',
 
@@ -711,10 +711,10 @@ app.post('/addEvent', function (req, res) {
                                                 type: 'openWidget',
                                                 desktopType: 'modal',
                                                 mobileType: 'modal',
-                                                url: 'https://a38764d4.ngrok.io/delete?event_id=' + event_id + '&user_id=' + val.participant_id + '&username=' + username
+                                                url: 'https://protected-chamber-96976.herokuapp.com/delete?event_id=' + event_id + '&user_id=' + val.participant_id + '&username=' + username
                                             },
                                             id: 'decline',
-                                            icon: 'https://a38764d4.ngrok.io/icon'
+                                            icon: 'https://protected-chamber-96976.herokuapp.com/icon'
                                         }]
                                 }]
 
@@ -801,7 +801,7 @@ app.post('/addExpense', function (req, res) {
                                             type: 'openWidget',
                                             desktopType: 'modal',
                                             mobileType: 'sidebar',
-                                            url: 'https://a38764d4.ngrok.io/manageExpenses'
+                                            url: 'https://protected-chamber-96976.herokuapp.com/manageExpenses'
                                         },
                                         id: 'view',
 
@@ -995,7 +995,7 @@ var insertParticipants=function(discussion_id,discussion_name,userId,username){
                     }],
                     buttons:[{
                         name:'View',
-                        action:{type:'openWidget',desktopType:'sidebar',mobileType:'sidebar',url:'https://a38764d4.ngrok.io/eventBar'},
+                        action:{type:'openWidget',desktopType:'sidebar',mobileType:'sidebar',url:'https://protected-chamber-96976.herokuapp.com/eventBar'},
                         id:'view',
                     }]
                 },function(error,response){
@@ -1099,7 +1099,7 @@ app.post('/settleExpense', function(req,res){
                                type: 'openWidget',
                                desktopType: 'modal',
                                mobileType: 'sidebar',
-                               url: 'https://a38764d4.ngrok.io/manageExpenses'
+                               url: 'https://protected-chamber-96976.herokuapp.com/manageExpenses'
                            },
                            id: 'view',
 
@@ -1143,7 +1143,7 @@ flock.events.on('client.slashCommand',function(event){
                                     participants=results;
                                     var requestData={discussion_name:discussion_name,userId:userId,username:username,participants:JSON.stringify(participants)}
                                     request({
-                                        url:'https://a38764d4.ngrok.io/newDiscussion',
+                                        url:'https://protected-chamber-96976.herokuapp.com/newDiscussion',
                                         method:'POST',
                                         json:requestData,
                                     },function(error,response,body){
@@ -1160,7 +1160,7 @@ flock.events.on('client.slashCommand',function(event){
                                                         },
                                                         buttons:[{
                                                             name:'View',
-                                                            action:{type:'openWidget',desktopType:'sidebar',mobileType:'sidebar',url:'https://a38764d4.ngrok.io/eventBar'},
+                                                            action:{type:'openWidget',desktopType:'sidebar',mobileType:'sidebar',url:'https://protected-chamber-96976.herokuapp.com/eventBar'},
                                                             id:'view',
                                                         }],
                                                     }]

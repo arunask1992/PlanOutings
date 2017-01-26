@@ -13,7 +13,7 @@
     <script type='text/javascript' src='https://apps-static.flock.co/js-sdk/0.1.0/flock.js'></script>
  </head>
  <body>
- <form action='https://a38764d4.ngrok.io/addComment' method='post'>
+ <form action='https://protected-chamber-96976.herokuapp.com/addComment' method='post'>
  	<% for(var i=0;i<userDiscussions.length;i++){ %>
  		<input type="radio" name="discussion_id" value=<%= userDiscussions[i].discussion_id %>><p><%=userDiscussions[i].discussion_name%></p><br>
  	<% } %>

@@ -210,7 +210,7 @@
 
     };
 
-  xhttp.open("GET", "https://a38764d4.ngrok.io/upvote?userId="+userId+"&username=<%=username%>&comment_id="+id, true);
+  xhttp.open("GET", "https://protected-chamber-96976.herokuapp.com/upvote?userId="+userId+"&username=<%=username%>&comment_id="+id, true);
   xhttp.send();
 
     }
@@ -228,7 +228,7 @@
       console.log(obj);
     }
   };
-  xhttp.open("GET", "https://a38764d4.ngrok.io/getContacts?userId="+userId, true);
+  xhttp.open("GET", "https://protected-chamber-96976.herokuapp.com/getContacts?userId="+userId, true);
   xhttp.send();
    }
       function search_suggest()
@@ -338,7 +338,7 @@
       var url="";
       id=id.substr(id.indexOf(' '),id.length);
       var userId=document.getElementById('userId').value;
-      url="https://a38764d4.ngrok.io/delete?event_id="+id+'&user_id='+userId+'&username=<%=username%>';
+      url="https://protected-chamber-96976.herokuapp.com/delete?event_id="+id+'&user_id='+userId+'&username=<%=username%>';
       location.href=url;
    }
    function newDiscussion()
@@ -352,7 +352,7 @@
     var userId=$('#userId').val();
     var username=$('#username').val();
     var discussion={discussion_name:discussion_name,participants:participants,userId:userId,username:username};
-    $.post("https://a38764d4.ngrok.io/newDiscussion",discussion,function(data, status){
+    $.post("https://protected-chamber-96976.herokuapp.com/newDiscussion",discussion,function(data, status){
         if(data==='done')
           {
         location.reload();
@@ -370,7 +370,7 @@
 <% } %>
 <% if(typeof discussionAdded==='success'){%>
 <script>
- flock.openWidget('https://a38764d4.ngrok.io/showSuggestion','modal','modal');
+ flock.openWidget('https://protected-chamber-96976.herokuapp.com/showSuggestion','modal','modal');
  </script>
  <div class="alert alert-success">
   <strong>Discussion was created successfully</strong> .
@@ -446,7 +446,7 @@ if(!isEmptyObject(rows)){ %>
 </div>
 <button id='newEvent' type='button' style='float:right;margin-top:10px;margin-right:5px;margin-bottom:8px' onClick='showForm();' class='btn-default btn-block'>Create a new Event <span class='glyphicon glyphicon-menu-down'></span></button><hr style='clear:both'></div>
     <div id='addEvent' style='display:none'>
-  <form action='https://a38764d4.ngrok.io/addEvent' method="POST">
+  <form action='https://protected-chamber-96976.herokuapp.com/addEvent' method="POST">
     <div class='form-group'>
     <label for='eventType'>Event type: </label>
    <input name='eventType' id='eventType' type='text' class='form-control' autofocus autocomplete='off' required>
@@ -473,15 +473,15 @@ if(!isEmptyObject(rows)){ %>
   </form>
 </div>
 <button id='newDiscussion' style='float:right;margin-top:10px;margin-right:5px;margin-bottom:8px' onClick='newDiscussion();' class='btn-default btn-block'>Create a new discussion <span class='glyphicon glyphicon-menu-down'></span></button><hr style='clear:both'></div>
-<button id='showFood' onClick="flock.openWidget('https://a38764d4.ngrok.io/showSuggestion', 'modal', 'modal')" style="float: left" class="btn-default">
+<button id='showFood' onClick="flock.openWidget('https://protected-chamber-96976.herokuapp.com/showSuggestion', 'modal', 'modal')" style="float: left" class="btn-default">
     <i class="fa fa-cutlery" aria-hidden="true"></i> Restaurants
 </button>
-<button id='showMovies' onClick="flock.openWidget('https://a38764d4.ngrok.io/movies', 'modal', 'modal')" style="float: right" class="btn-default">
+<button id='showMovies' onClick="flock.openWidget('https://protected-chamber-96976.herokuapp.com/movies', 'modal', 'modal')" style="float: right" class="btn-default">
     <i class="fa fa-film" aria-hidden="true"></i> Movies
 </button>
 <br/>
 <br/>
-<button type='button' id='manageExpenses' onClick="flock.openWidget('https://a38764d4.ngrok.io/manageExpenses', 'modal', 'modal')" class='btn-default btn-block'>Manage Expenses <span class='glyphicon glyphicon-menu-down'></span></button>
+<button type='button' id='manageExpenses' onClick="flock.openWidget('https://protected-chamber-96976.herokuapp.com/manageExpenses', 'modal', 'modal')" class='btn-default btn-block'>Manage Expenses <span class='glyphicon glyphicon-menu-down'></span></button>
 <br/>
 <br/>
 <div id='addDiscussion' style='display:none'>
@@ -526,7 +526,7 @@ for(var i=0;i<latestcomments.length;i++){ %>
   </div>
 
 <% } }%>
-  <form action='https://a38764d4.ngrok.io/addComment' method='post'>
+  <form action='https://protected-chamber-96976.herokuapp.com/addComment' method='post'>
     <input type='text'  name='comment'>
     <input type='hidden' id='userId' name='userId' value=<%= userId %>>
     <input type='hidden' id='username' value=<%=username %>>

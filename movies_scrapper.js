@@ -69,7 +69,7 @@ exports.getContents = function getContents(city)
 
 exports.fetchScrapedMovies = function fetchScrapedMovies(callback){
     var response;
-    con.query("SELECT * from scrapedMovies where image_url <> 'https://a38764d4.ngrok.io/download.png'",[], function(err,res){
+    con.query("SELECT * from scrapedMovies where image_url <> 'https://protected-chamber-96976.herokuapp.com/download.png'",[], function(err,res){
         if(err) throw err;
         else{
             callback(JSON.stringify(res));
